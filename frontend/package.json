@@ -10,6 +10,8 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@stream-io/video-client": "^1.26.0",
+    "@stream-io/video-react-sdk": "^1.18.12",
     "@tailwindcss/vite": "^4.1.11",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",

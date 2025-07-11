@@ -21,7 +21,7 @@
   --bg-chatWindow: linear-gradient(135deg, #0a0f1f, #0f172a, #1e293b);
   --bg-navBar:  #1e293b;
   --navbar-textColor: #ffffff;
-  --bg-sideBar: #0f0f0f;
+  --bg-sideBar: #0a0c1a;
   --sideBar-textColor: #ffffff;
   --sideHeader-textColor: #ffffff;
   --bg-chatInput: #0f1a33;
@@ -112,6 +112,8 @@ button:hover .icon{
 }
 
 
+
+
 .chat-input {
   flex: 1;
   padding: 12px 16px;
@@ -169,7 +171,7 @@ button:hover .icon{
   padding: 5px 8px;
   border-radius: 5px;
   margin: 4px;
-  font-size: 17px;
+  font-size: 15px;
   min-width: 90px;
 }
 

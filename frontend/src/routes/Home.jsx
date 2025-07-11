@@ -10,6 +10,7 @@ import { FaBan } from "react-icons/fa";
 import { PiChatSlashFill } from "react-icons/pi";
 import { MdDarkMode } from "react-icons/md";
 import { IoVideocamSharp } from "react-icons/io5";
+import { IoLogOutOutline } from "react-icons/io5";
 
 
 const Home = () => {
@@ -60,7 +61,7 @@ const Home = () => {
     };
   }, []);
 
-
+  const currentUser = allUsers.find(u => u.username === username);
 
   const [messages, setMessages] = useState([])
   const [isTyping, setIsTyping] = useState();
@@ -190,7 +191,7 @@ const Home = () => {
       localStorage.removeItem("token")
       alert(`You have been banned by ${localStorage.getItem("bannedBy")}`)
       navigate("/login")
-    }
+    } 0
 
     return () => {
       socket.current.off("message")
@@ -217,7 +218,7 @@ const Home = () => {
   const handleChange = (e) => {
     setValue(e.target.value)
     socket.current.emit("typing", username);
-
+    textarea.style.height = "auto";
     textarea.style.height = `${textarea.scrollHeight}px`;
   }
 
@@ -241,7 +242,14 @@ const Home = () => {
       }
 
       setValue("")
-      textarea.style.height = "auto";
+
+    }
+  }
+
+  const handleKeyDown = (e) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault()
+      handleClick()
     }
   }
 
@@ -349,7 +357,6 @@ const Home = () => {
     }
   }, []);
 
-  const currentUser = allUsers.find(u => u.username === username);
 
   return (
 
@@ -362,7 +369,12 @@ const Home = () => {
         </button>
 
         <div className="px-4 relative">
-          <h1 className="text-2xl font-semibold mb-4 border-b pb-2 text-gray-700 sideHeader">Users</h1>
+
+          <div className="flex justify-between items-center font-semibold mb-4 border-b pb-2 text-gray-700 sideHeader"><h1 className="text-3xl">Users</h1>
+            <button className="text-sm" onClick={() => localStorage.removeItem("token")}><IoLogOutOutline className="icon" size={20} /></button>
+          </div>
+
+
           <input onChange={handleSearch} value={searchValue} className="searchBar mb-[10px]" type="text" placeholder="🔍 Search users..." />
           <span className="flex items-center">
             <span className="animate-pulse w-4 h-4 rounded-full ml-[6px] bg-green-500"></span>
@@ -414,18 +426,18 @@ const Home = () => {
                   })
                   .map(user => (
                     <li key={uuidv4()} className="sideList flex items-center gap-2 py-2 rounded">
-                      <span
-                        className={`w-3 h-3 ml-2 my-2 rounded-full ${onlineUsers.includes(user.username) ? "bg-green-500" : "bg-gray-400"
-                          }`}
-                      ></span>
+                      <span className={`w-3 h-3 ml-2 my-2 rounded-full ${onlineUsers.includes(user.username) ? "bg-green-500" : "bg-gray-400"}`}></span>
                       <div className="flex items-center gap-2">
+
                         <div className="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center text-white text-sm font-bold uppercase">
-                          {user.username.charAt(0)}
+                          {user.username && user.username.charAt(0)}
                         </div>
                         <span className={`${user.role === "admin" ? "text-red-600" : ""}`}>{user.username}</span>
                       </div>
                       <div className="admin flex gap-[15px] ml-auto pr-2">
-                        <button onClick={() => initiateCall(user.username)}><IoVideocamSharp /></button>
+                        <button>
+                          <IoVideocamSharp />
+                        </button>
                         {isAdmin.current &&
                           <div className="flex items-center gap-[15px]">
                             <button onClick={() => handleMute(user)}>
@@ -450,7 +462,7 @@ const Home = () => {
         {(currentUser && !currentUser.isMuted) &&
 
           <div className="message-input">
-            <textarea className="chat-input resize-none" ref={textareaRef} value={value} onChange={handleChange} rows={1} placeholder="Type a message" />
+            <textarea className="chat-input resize-none" onKeyDown={handleKeyDown} ref={textareaRef} value={value} onChange={handleChange} rows={1} placeholder="Type a message" />
             <button className="send-btn" onClick={handleClick}>Send</button>
           </div>
         }

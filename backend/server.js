@@ -9,6 +9,7 @@ import Auth from "./middleware/auth.js"
 import { Server } from "socket.io"
 import Chat from "./models/Chat.js"
 import { v4 as uuidv4 } from "uuid"
+import { StreamChat } from "stream-chat"
 
 dotenv.config()
 const app = express()
@@ -16,7 +17,7 @@ const server = createServer(app)
 const io = new Server(server, {
     cors: {
         origin: ["http://localhost:5173",
-        process.env.FRONTEND_URL]
+            process.env.FRONTEND_URL]
     }
 })
 const port = 3000
@@ -123,8 +124,8 @@ io.on('connection', socket => {
             message: `${username} joined the chat`,
             type: "join",
             date: new Date(Date.now()).toLocaleDateString('en-IN', {
+                month: 'short', year: 'numeric',
                 weekday: 'short', day: '2-digit',
-                month: 'short', year: 'numeric'
             }),
             sender: username
         }
@@ -155,10 +156,22 @@ io.on('connection', socket => {
 
 const JWT_SECRET = process.env.JWT_SECRET
 
+const apiKey = process.env.STREAM_API_KEY
+const apiSecret = process.env.STREAM_SECRET
+const serverClient = StreamChat.getInstance(apiKey, apiSecret);
+
 import mongoose from "mongoose"
 await mongoose.connect(process.env.MONGO_URL)
 
+
 app.use(cors(), express.json())
+
+
+app.post("/token", (req, res) => {
+    const { userId } = req.body;
+    const token = serverClient.createToken(userId);
+    res.json({ token, apiKey });
+});
 
 app.post('/register', async (req, res) => {
     try {

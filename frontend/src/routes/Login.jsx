@@ -100,26 +100,13 @@ const Login = () => {
         </div>
         <form className=' flex flex-col items-center gap-[20px] my-8' action="" onSubmit={handleSubmit(onSubmit)}>
           <div>
-            <input className='input' type="text" {...register("username", { required: { value: true, message: "* This field is required" }, pattern: { value: /^[a-zA-Z0-9_]+$/, message: "Only letters, numbers, and underscores are allowed" }, minLength: { value: 4, message: "Must contain atleast 4 characters" }, maxLength: { value: 12, message: "Cannot exceed 12 characters" } })} placeholder='Enter username' />
+            <input className='input' type="text" {...register("username", { required: { value: true, message: "* This field is required" } })} placeholder='Enter username' />
             {errors.username && <div className='text-red-600 text-sm'>{errors.username.message}</div>}
 
           </div>
           <div className='relative'>
             <input className='password input' {...register("password", {
-              required: { value: true, message: "* This field is required" }, validate: {
-                hasLower: (value) =>
-                  /[a-z]/.test(value) || "Must include a lowercase letter",
-                hasUpper: (value) =>
-                  /[A-Z]/.test(value) || "Must include an uppercase letter",
-                hasNumber: (value) =>
-                  /\d/.test(value) || "Must include a number",
-                hasSpecial: (value) =>
-                  /[^A-Za-z0-9]/.test(value) || "Must include a special character",
-                minLength: (value) =>
-                  value.length >= 6 || "Password must be at least 6 characters",
-                maxLength: (value) =>
-                  value.length <= 16 || "Password must be at most 16 characters",
-              }
+              required: { value: true, message: "* This field is required" }
             })} type={showPassword ? "text" : "password"} placeholder="Password" />
             <button type="button" className='password cursor-pointer' onClick={handlePassClick}>{showPassword ? <IoIosEye /> : <FaEyeSlash />}</button>
             {errors.password && <div className='text-red-600 relative left-[8px] text-sm'>{errors.password.message}</div>}
