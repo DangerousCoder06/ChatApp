@@ -104,7 +104,6 @@ const Home = () => {
           }
           return msg;
         });
-
         return updatedMessages;
       });
     })
@@ -182,19 +181,31 @@ const Home = () => {
       }
       if (localStorage.getItem("isBanned") === "true") {
         localStorage.removeItem("token")
-        navigate("/login")
         alert(`You have been banned by ${localStorage.getItem("bannedBy")}`)
+        navigate("/login")
       }
+
     })
     if (localStorage.getItem("isBanned") === "true") {
       localStorage.removeItem("token")
-      navigate("/login")
       alert(`You have been banned by ${localStorage.getItem("bannedBy")}`)
+      navigate("/login")
+    }
+
+    return () => {
+      socket.current.off("message")
+      socket.current.off("joined")
+      socket.current.off("left")
+      socket.current.off("user-online")
+      socket.current.off("connect")
+      socket.current.off("user-list")
+      socket.current.off("show-typing")
+      socket.current.off("mute-status-updated")
     }
 
 
-
   }, [])
+
 
   useEffect(() => {
     localStorage.setItem("message", JSON.stringify(messages))
@@ -256,9 +267,6 @@ const Home = () => {
         localStorage.removeItem("token")
         navigate("/login")
         return;
-      }
-      if (res.status===403){
-        return
       }
 
     }

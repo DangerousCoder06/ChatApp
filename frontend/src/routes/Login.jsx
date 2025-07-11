@@ -22,7 +22,7 @@ const Login = () => {
             Authorization: `Bearer ${token}`
           }
         })
-
+        
         if (res.status === 200) {
           navigate("/home")
         }
@@ -54,7 +54,7 @@ const Login = () => {
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 10000);
 
-    const {username, password} = data
+    const { username, password } = data
 
     try {
       const res = await fetch(`${API_URL}/login`, {
@@ -66,27 +66,27 @@ const Login = () => {
 
       clearTimeout(timeout);
 
-      if (res.status===401){
+      if (res.status === 401) {
         const e = await res.json()
         alert(e.error);
         return;
       }
 
-      
-        const { token } = await res.json();
-        localStorage.setItem("token", token);
-        localStorage.setItem("username", username);
-        navigate("/home");
-        reset()
-      
+
+      const { token } = await res.json();
+      localStorage.setItem("token", token);
+      localStorage.setItem("username", username);
+      navigate("/home");
+      reset()
+
 
     } catch (err) {
-        if(err.name==="AbortError"){
-            alert("⏰ Request timed out. Plese try again")
-        }
-        else{
-            alert("❌ Something went wrong. Please try again later")
-        }
+      if (err.name === "AbortError") {
+        alert("⏰ Request timed out. Plese try again")
+      }
+      else {
+        alert("❌ Something went wrong. Please try again later")
+      }
     }
   };
 
@@ -130,8 +130,8 @@ const Login = () => {
 
         </form>
         <div className='text-sm relative bottom-[20px]'>
-            <span>New user? </span>
-            <Link to="/register" className='underline text-blue-600'>Sign Up</Link>
+          <span>New user? </span>
+          <Link to="/register" className='underline text-blue-600'>Sign Up</Link>
         </div>
       </div>
     </div>
