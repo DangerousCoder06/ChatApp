@@ -1,0 +1,66 @@
+.login{
+  background: url("https://img.freepik.com/free-vector/flat-world-emoji-day-background-with-emoticons_23-2149427424.jpg");
+  z-index: 1;
+  position: relative;
+  overflow-y: hidden;
+}
+.login::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: url('https://img.freepik.com/free-vector/flat-world-emoji-day-background-with-emoticons_23-2149427424.jpg');
+  background-size: cover;
+  background-position: center;
+  filter: blur(4px);
+  z-index: -1;
+}
+
+input{
+  height:47px;
+  border-radius: 5px;
+  border: 2px solid rgb(168, 168, 168);
+  padding: 10px;
+  width: 280px;
+}
+
+button.password{
+  position: relative;
+  right: 20px;
+  transform: scale(1.2);
+}
+input.password{
+  position: relative;
+  left: 8px;
+}
+
+@media (max-width: 640px) {
+  input, .submit{
+    width: 250px;
+
+  }
+}
+@media (max-width: 350px) {
+  input, .submit{
+    width: 150px;
+
+  }
+  .header{
+  width: 150px;
+}
+
+}
+.form{
+  animation: login 1s cubic-bezier(0, 0.3, 0.2, 0.96);
+}
+
+@keyframes login {
+  from{
+    transform: translateY(50vw);
+  }
+  to {
+
+  }
+}

@@ -1,0 +1,238 @@
+:root {
+  --bg-chatWindow: linear-gradient(135deg, #dbeafe, #93c5fd, #3b82f6);
+  --bg-messageInput: #ffffffd0;
+  --bg-navBar: #ffffffd0;
+  --text-color: #000000;
+  --bg-sideBar: #ffffff;
+  --sideHeader-textColor: #000000;
+  --bg-chatInput: #fff;
+  --chatInput-textColor: #000000; 
+  --bg-messageInput: #ffffffd0;
+  --placeholder-color: #555;
+  --hoverColor: #f3f4f6;
+  --messageColor-sent: #dcfce7;
+  --messageColor-recieved: #f1f5f9;
+  --messageText: #000000;
+  --muteMessage-color: #000000;
+  --btn-color: #000000;
+}
+
+.dark-mode {
+  --bg-chatWindow: linear-gradient(135deg, #0a0f1f, #0f172a, #1e293b);
+  --bg-navBar:  #1e293b;
+  --navbar-textColor: #ffffff;
+  --bg-sideBar: #0f0f0f;
+  --sideBar-textColor: #ffffff;
+  --sideHeader-textColor: #ffffff;
+  --bg-chatInput: #0f1a33;
+  --chatInput-textColor: #ffffff; 
+  --bg-messageInput: #2a3942;
+  --placeholder-color: #aaa;
+  --hoverColor: #1e293b;
+  --messageColor-recieved: #202c33;
+  --messageColor-sent: #005c4b;
+  --messageText: #ffffff;
+  --muteMessage-color: #ffffff;
+  --btn-color: #000000;
+}
+
+*{
+  transition: all 0.3s ease;
+}
+
+.muteMessage{
+  color: var(--muteMessage-color);
+}
+
+.sideHeader{
+  color: var(--sideHeader-textColor);
+}
+
+.chat-window {
+  display: flex;
+  flex-direction: column-reverse;
+  height: 100vh;
+  background: var(--bg-chatWindow);
+  padding-bottom: 16px;
+  box-sizing: border-box;
+  overflow: hidden;
+  position: relative;
+}
+
+.sideBar{
+  scrollbar-width: none;
+  background: var(--bg-sideBar);
+  color: var(--sideBar-textColor)
+}
+
+.searchBar{
+  width: 250px;
+  height: 40px;
+  border-radius: 5px;
+  border: 1px solid rgb(154, 150, 150);
+}
+
+.admin{
+  justify-self: flex-end;
+}
+
+.navbar{
+  background-color: var(--bg-navBar);
+  width: 100%;
+  padding: 10px;
+  color: var(--navbar-textColor)
+}
+
+button:hover .icon{
+  color: black;
+}
+
+.hamBurger, .back{
+  transition: all 150ms linear;
+}
+
+.message-input {
+  display: flex;
+  gap: 12px;
+  padding: 12px 16px;
+  background-color: var(--bg-messageInput);
+  border-top: 1px solid #ccc;
+  position: sticky;
+  bottom: 0;
+  z-index: 10;
+  backdrop-filter: blur(8px);
+  box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.05);
+  align-items: flex-end;
+  border: 0px;
+}
+
+.chat-input::placeholder {
+  color: var(--placeholder-color);
+  
+}
+
+
+.chat-input {
+  flex: 1;
+  padding: 12px 16px;
+  border-radius: 24px;
+  border: 1.5px solid #ccc;
+  font-size: 1rem;
+  outline: none;
+  background-color: var(--bg-chatInput);
+  box-shadow: inset 0 1px 2px rgba(0,0,0,0.05);
+  transition: all 0.2s ease;
+  scrollbar-width: none;
+  max-height: 150px;
+  color: var(--chatInput-textColor);
+  border: 0px;
+  
+}
+
+.sideList:hover{
+  background-color: var(--hoverColor);
+}
+
+.chat-input:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+}
+
+.status{
+  margin-left: 3px;
+}
+
+.send-btn {
+  background: linear-gradient(135deg, #3b82f6, #60a5fa);
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 24px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.1s ease;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+}
+
+.send-btn:hover {
+  background: linear-gradient(135deg, #2563eb, #3b82f6);
+  transform: translateY(-1px);
+}
+
+.send-btn:active {
+  transform: scale(0.98);
+}
+
+.message {
+  max-width: 80%;
+  padding: 5px 8px;
+  border-radius: 5px;
+  margin: 4px;
+  font-size: 17px;
+  min-width: 90px;
+}
+
+
+.message.sent {
+  background-color: var(--messageColor-sent);
+  align-self: flex-end;
+  color: var(--messageText);
+}
+
+.scroll{
+  scrollbar-width: none;
+}
+
+
+.message.received {
+  background-color: var(--messageColor-recieved);
+  align-self: flex-start;
+  color: var(--messageText);
+}
+
+.messages-container {
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  flex: 1;
+  padding: 12px 4px;
+  gap: 10px;
+  scrollbar-width: none;
+}
+
+.time{
+  align-self: flex-end;
+}
+
+
+.dot-anim {
+  animation: blink 1s infinite;
+  animation-delay: 0.2s;
+}
+.dot-anim:nth-child(2) {
+  animation-delay: 0.4s;
+}
+.dot-anim:nth-child(3) {
+  animation-delay: 0.6s;
+}
+
+
+body {
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+
+@keyframes blink {
+  0% { opacity: 0; }
+  50% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+@media (min-width:1000px) {
+  .message{
+    max-width: 700px;
+  }
+}
