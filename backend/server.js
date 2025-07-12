@@ -11,14 +11,14 @@ import Chat from "./models/Chat.js"
 import { v4 as uuidv4 } from "uuid"
 import { StreamChat } from "stream-chat"
 import Action from "./models/Action.js"
+import authRouter from "./routes/streamAuth.js"
 
 dotenv.config()
 const app = express()
 const server = createServer(app)
 const io = new Server(server, {
     cors: {
-        origin: ["http://localhost:5173",
-            process.env.FRONTEND_URL]
+        origin: "http://localhost:5173"
     }
 })
 const port = 3000
@@ -41,6 +41,15 @@ io.on('connection', socket => {
             console.error("Error saving chat message:", error);
         }
 
+    })
+
+    socket.on("incoming-call", ({callee, callId, caller}) => {
+        const calleeSocketId = onlineUsers.get(callee)
+        if (calleeSocketId){
+            io.to(calleeSocketId).emit("incoming-call", {callId, caller})
+        } else {
+            console.log("callee not online");
+        }
     })
 
     socket.on("toggle-mute", async ({ targetUsername, by }) => {
@@ -151,7 +160,7 @@ io.on('connection', socket => {
             return
         }
 
-        onlineUsers.set(socket.id, username);
+        onlineUsers.set(username, socket.id);
 
 
         allUsers.length = 0;
@@ -161,7 +170,7 @@ io.on('connection', socket => {
         }
 
         io.emit("user-list", {
-            onlineUsers: Array.from(onlineUsers.values()),
+            onlineUsers: Array.from(onlineUsers.keys()),
             allUsers
         })
 
@@ -184,7 +193,7 @@ io.on('connection', socket => {
             onlineUsers.delete(socket.id)
 
             io.emit("user-list", {
-                onlineUsers: Array.from(onlineUsers.values()),
+                onlineUsers: Array.from(onlineUsers.keys()),
                 allUsers
             })
 
@@ -214,6 +223,7 @@ await mongoose.connect(process.env.MONGO_URL)
 
 
 app.use(cors(), express.json())
+app.use('/auth', authRouter)
 
 
 app.post("/token", (req, res) => {

@@ -11,7 +11,10 @@ import { PiChatSlashFill } from "react-icons/pi";
 import { MdDarkMode } from "react-icons/md";
 import { IoVideocamSharp } from "react-icons/io5";
 import { IoLogOutOutline } from "react-icons/io5";
-
+import { StreamVideoProvider } from "@stream-io/video-react-sdk";
+import { fetchStreamToken } from "../utils/getStreamToken";
+import { getVideoClient } from "../utils/videoClient";
+import VideoCall from "../components/VideoCall";
 
 const Home = () => {
   const username = localStorage.getItem("username");
@@ -27,6 +30,9 @@ const Home = () => {
   const [allUsers, setAllUsers] = useState([])
   const [onlineUsers, setOnlineUsers] = useState([])
   const [searchValue, setSearchValue] = useState("")
+  const [streamClient, setStreamClient] = useState(null);
+  const [callObject, setCallObject] = useState(null);
+
 
   const isTabActiveRef = useRef(document.visibilityState === "visible");
 
@@ -190,7 +196,22 @@ const Home = () => {
       navigate("/login")
     }
 
+
+    socket.current.on("incoming-call", async ({callId, caller}) => {
+      const accept = window.confirm(`${caller} is calling. Want to join?`)
+      if (accept){
+        const {token, apiKey} = await fetchStreamToken(username)
+        const videoClient = getVideoClient(apiKey, username, token);
+        setStreamClient(videoClient)
+
+        const call = videoClient.call("default", callId)
+        await call.join()
+        setCallObject(call)
+      }
+    })
+
     return () => {
+      socket.current.off("incoming-call")
       socket.current.off("message")
       socket.current.off("joined")
       socket.current.off("left")
@@ -358,14 +379,42 @@ const Home = () => {
     }
   }, []);
 
-  const handleVideoCall = (user) => {
+  const handleVideoCall = async (user) => {
+    const userId = username
+
+    try {
+      const { token, apiKey } = await fetchStreamToken(userId)
+      const videoClient = getVideoClient(apiKey, userId, token)
+      setStreamClient(videoClient)
+
+      const callId = `${userId}-${user.username}-${uuidv4()}`
+      const call = videoClient.call("default", callId)
+      await call.getOrCreate({
+        caller: userId,
+        members: [userId, user.username]
+      })
+      await call.join()
+
+      setCallObject(call)
+      socket.current.emit("incoming-call", {callId, caller: userId, callee: user.username})
+    } catch (err) {
+      console.error("Call failed:", err);
+    }
 
   }
 
 
   return (
 
+
+
     <div className="relative">
+      <StreamVideoProvider client={streamClient} theme="dark">
+        {callObject && <VideoCall call={callObject} onEnd={() => {
+          callObject.leave();
+          setCallObject(null);
+        }} />}
+      </StreamVideoProvider>
 
       <div className={`sideBar fixed h-full top-0 left-0 w-[300px] bg-white shadow-xl z-50 transform transition-transform duration-250 ease-in-out ${isOpen ? 'translate-x-0' : '-translate-x-full'} rounded-r-sm overflow-y-auto`}>
 
@@ -440,8 +489,8 @@ const Home = () => {
                         </span>
                       </div>
                       <div className="admin flex gap-[15px] ml-auto pr-2">
-                        <button>
-                          <IoVideocamSharp onClick={handleVideoCall} />
+                        <button onClick={() => handleVideoCall(user)}>
+                          <IoVideocamSharp className="icon" />
                         </button>
                         {isAdmin.current &&
                           <div className="flex items-center gap-[15px]">
