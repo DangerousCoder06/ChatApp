@@ -12,35 +12,34 @@ import { MdDarkMode } from "react-icons/md";
 import { IoVideocamSharp } from "react-icons/io5";
 import { IoLogOutOutline } from "react-icons/io5";
 import { StreamVideoProvider } from "@stream-io/video-react-sdk";
-import { fetchStreamToken } from "../utils/getStreamToken";
-import { getVideoClient } from "../utils/videoClient";
+import IncomingCallModal from "../components/IncomingCallModal";
 import VideoCall from "../components/VideoCall";
 
 const Home = () => {
-  const username = localStorage.getItem("username");
+  const username = localStorage.getItem("username")
   const API_URL = import.meta.env.VITE_API_URL
-  const navigate = useNavigate();
+  const navigate = useNavigate()
 
   const socket = useRef()
 
 
-  const textareaRef = useRef(null);
+  const textareaRef = useRef(null)
   const textarea = textareaRef.current;
   const [isOpen, setisOpen] = useState(false)
   const [allUsers, setAllUsers] = useState([])
   const [onlineUsers, setOnlineUsers] = useState([])
   const [searchValue, setSearchValue] = useState("")
-  const [streamClient, setStreamClient] = useState(null);
-  const [callObject, setCallObject] = useState(null);
+  const [streamClient, setStreamClient] = useState(null)
+  const [callObject, setCallObject] = useState(null)
+  const [incomingCall, setIncomingCall] = useState(null)
 
 
-  const isTabActiveRef = useRef(document.visibilityState === "visible");
-
+  const isTabActiveRef = useRef(document.visibilityState === "visible")
 
   useEffect(() => {
     const handleVisibilityChange = () => {
-      const isVisible = document.visibilityState === "visible";
-      isTabActiveRef.current = isVisible;
+      const isVisible = document.visibilityState === "visible"
+      isTabActiveRef.current = isVisible
 
       if (isVisible) {
 
@@ -49,22 +48,22 @@ const Home = () => {
             if (m.status === "delivered" && m.sender != username) {
               const seenMsg = { ...m, status: "seen" }
               socket.current.emit("status", seenMsg)
-              return seenMsg;
+              return seenMsg
             }
             return m;
           });
-          return updatedMessages;
+          return updatedMessages
         });
       }
     };
 
-    document.addEventListener("visibilitychange", handleVisibilityChange);
+    document.addEventListener("visibilitychange", handleVisibilityChange)
     return () => {
-      document.removeEventListener("visibilitychange", handleVisibilityChange);
+      document.removeEventListener("visibilitychange", handleVisibilityChange)
     };
   }, []);
 
-  const currentUser = allUsers.find(u => u.username === username);
+  const currentUser = allUsers.find(u => u.username === username)
 
   const [messages, setMessages] = useState([])
   const [isTyping, setIsTyping] = useState();
@@ -90,12 +89,12 @@ const Home = () => {
 
     if (!socket.current) {
       socket.current = io("http://localhost:3000")
-      socket.current.emit("user-connected", username);
+      socket.current.emit("user-connected", username)
     }
 
     socket.current.on("show-typing", (username) => {
       setIsTyping(username);
-      setTimeout(() => setIsTyping(null), 1500);
+      setTimeout(() => setIsTyping(null), 1500)
     })
 
     socket.current.on('connect', () => {
@@ -122,7 +121,7 @@ const Home = () => {
           msg.status = "delivered"
         }
         socket.current.emit('status', msg)
-        setMessages(messages => [...messages, msg]);
+        setMessages(messages => [...messages, msg])
 
       }
 
@@ -142,7 +141,7 @@ const Home = () => {
           message => message.status === "sent" && message.sender === username
         );
         undeliveredMessages.forEach(message => {
-          socket.current.emit("user-message", message);
+          socket.current.emit("user-message", message)
         });
 
         return prevMessages;
@@ -197,17 +196,8 @@ const Home = () => {
     }
 
 
-    socket.current.on("incoming-call", async ({callId, caller}) => {
-      const accept = window.confirm(`${caller} is calling. Want to join?`)
-      if (accept){
-        const {token, apiKey} = await fetchStreamToken(username)
-        const videoClient = getVideoClient(apiKey, username, token);
-        setStreamClient(videoClient)
-
-        const call = videoClient.call("default", callId)
-        await call.join()
-        setCallObject(call)
-      }
+    socket.current.on("incoming-call", async ({ callId, caller }) => {
+      setIncomingCall({ callId, caller });
     })
 
     return () => {
@@ -235,9 +225,9 @@ const Home = () => {
 
   const handleChange = (e) => {
     setValue(e.target.value)
-    socket.current.emit("typing", username);
-    textarea.style.height = "auto";
-    textarea.style.height = `${textarea.scrollHeight}px`;
+    socket.current.emit("typing", username)
+    textarea.style.height = "auto"
+    textarea.style.height = `${textarea.scrollHeight}px`
   }
 
   const handleClick = () => {
@@ -254,7 +244,7 @@ const Home = () => {
     if (value != "") {
       if (socket.current.connected) {
         socket.current.emit("user-message", sendMessage)
-        setMessages(messages => [...messages, sendMessage]);
+        setMessages(messages => [...messages, sendMessage])
       } else {
         setMessages(messages => [...messages, { ...sendMessage, status: "pending" }])
       }
@@ -305,14 +295,14 @@ const Home = () => {
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
       <path d="M4 12l6 6L20 6" stroke={color} strokeWidth="2" />
     </svg>
-  );
+  )
 
   const DoubleTick = ({ color = "#999" }) => (
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
       <path d="M2 12l5 5L18 4" stroke={color} strokeWidth="2" />
       <path d="M7 12l5 5L22 4" stroke={color} strokeWidth="2" />
     </svg>
-  );
+  )
 
   const Pending = () => (
     <svg
@@ -344,7 +334,7 @@ const Home = () => {
 
   useEffect(() => {
     if (allUsers.length != 0) {
-      const currentUser = allUsers.find(u => u.username === username);
+      const currentUser = allUsers.find(u => u.username === username)
       localStorage.setItem("currentUser", JSON.stringify(currentUser))
       if (currentUser.role === "admin") {
         isAdmin.current = true
@@ -358,7 +348,7 @@ const Home = () => {
   const current = JSON.parse(localStorage.getItem("currentUser"))
 
   const handleMute = (targetUser) => {
-    socket.current.emit("toggle-mute", { targetUsername: targetUser.username, by: username });
+    socket.current.emit("toggle-mute", { targetUsername: targetUser.username, by: username })
   }
 
   const handleBan = (targetUser) => {
@@ -366,49 +356,66 @@ const Home = () => {
   }
 
   const toggleDark = () => {
-    document.body.classList.toggle("dark-mode");
+    document.body.classList.toggle("dark-mode")
     localStorage.setItem(
       "theme",
       document.body.classList.contains("dark-mode") ? "dark" : "light"
-    );
-  };
+    )
+  }
 
   useEffect(() => {
     if (localStorage.getItem("theme") === "dark") {
-      document.body.classList.add("dark-mode");
+      document.body.classList.add("dark-mode")
     }
-  }, []);
+  }, [])
 
   const handleVideoCall = async (user) => {
     const userId = username
+    const callId = `${userId}-${user.username}-${uuidv4()}`
 
-    try {
-      const { token, apiKey } = await fetchStreamToken(userId)
-      const videoClient = getVideoClient(apiKey, userId, token)
-      setStreamClient(videoClient)
-
-      const callId = `${userId}-${user.username}-${uuidv4()}`
-      const call = videoClient.call("default", callId)
-      await call.getOrCreate({
-        caller: userId,
-        members: [userId, user.username]
-      })
-      await call.join()
-
-      setCallObject(call)
-      socket.current.emit("incoming-call", {callId, caller: userId, callee: user.username})
-    } catch (err) {
-      console.error("Call failed:", err);
-    }
-
+    const popup = window.open(
+      `/video-call?callId=${callId}&caller=${userId}&callee=${user.username}`,
+      "_blank",
+      "width=700,height=500"
+    )
+    socket.current.emit("incoming-call", { callId, caller: userId, callee: user.username })
   }
+
+  useEffect(() => {
+    const handleCallEnded = (event) => {
+      if (event.data?.type === "CALL_ENDED" && event.data.callId === incomingCall?.callId) {
+        setIncomingCall(null);
+      }
+    };
+
+    window.addEventListener("message", handleCallEnded);
+    return () => window.removeEventListener("message", handleCallEnded)
+  }, [incomingCall])
+
 
 
   return (
 
-
-
     <div className="relative">
+      {incomingCall && (
+        <IncomingCallModal
+          caller={incomingCall.caller}
+          onAccept={async () => {
+            const popup = window.open(
+              `/video-call?callId=${incomingCall.callId}&caller=${incomingCall.caller}&callee=${username}`,
+              "_blank",
+              "width=700,height=500"
+            );
+
+            setIncomingCall(null)
+          }}
+          onReject={() => {
+            setIncomingCall(null)
+          }}
+        />
+      )}
+
+
       <StreamVideoProvider client={streamClient} theme="dark">
         {callObject && <VideoCall call={callObject} onEnd={() => {
           callObject.leave();

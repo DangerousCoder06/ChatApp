@@ -3,9 +3,9 @@ import Register from './routes/Register.jsx'
 import Login from "./routes/Login.jsx"
 import Home from './routes/Home.jsx'
 import Main from './routes/Main.jsx'
+import VideoCallPopup from "./routes/VideoCallPopup.jsx"
 
 function App() {
-
 
   return (
     <>
@@ -14,6 +14,8 @@ function App() {
         <Route path='/login' element={<Login />}></Route>
         <Route path='/home' element={<Home />}></Route>
         <Route path='/' element={<Main />}></Route>
+        <Route path="/video-call" element={<VideoCallPopup />} />
+
         
       </Routes>
     </>

@@ -1,0 +1,31 @@
+:root{
+    --bg-box: white;
+    --text-h1: black;
+    --text-h2: #272d32;
+    --border-box: #E5E7EB;
+}
+
+.dark-mode{
+    --bg-box: #1F2937;
+    --text-h1: white;
+    --text-h2: #E5E7EB;
+    --border-box: #374151;
+}
+
+.box{
+    background-color: var(--bg-box);
+    border: 1px solid var(--border-box);
+    animation: slideLeft 100ms ease-in ;
+}
+.h1{
+    color: var(--text-h1);
+}
+.h2{
+    color: var(--text-h2);
+}
+
+@keyframes slideLeft {
+    from{
+        transform: translateX(100px);
+    }
+}
