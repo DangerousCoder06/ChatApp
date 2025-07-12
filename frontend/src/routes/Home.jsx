@@ -18,7 +18,6 @@ const Home = () => {
   const API_URL = import.meta.env.VITE_API_URL
   const navigate = useNavigate();
 
-  const [call, setCall] = useState(null);
   const socket = useRef()
 
 
@@ -29,7 +28,6 @@ const Home = () => {
   const [onlineUsers, setOnlineUsers] = useState([])
   const [searchValue, setSearchValue] = useState("")
 
-  const [isTabActive, setIsTabActive] = useState(document.visibilityState === "visible");
   const isTabActiveRef = useRef(document.visibilityState === "visible");
 
 
@@ -37,7 +35,6 @@ const Home = () => {
     const handleVisibilityChange = () => {
       const isVisible = document.visibilityState === "visible";
       isTabActiveRef.current = isVisible;
-      setIsTabActive(isVisible);
 
       if (isVisible) {
 
@@ -191,7 +188,7 @@ const Home = () => {
       localStorage.removeItem("token")
       alert(`You have been banned by ${localStorage.getItem("bannedBy")}`)
       navigate("/login")
-    } 0
+    }
 
     return () => {
       socket.current.off("message")
@@ -327,13 +324,17 @@ const Home = () => {
   useEffect(() => {
     if (allUsers.length != 0) {
       const currentUser = allUsers.find(u => u.username === username);
+      localStorage.setItem("currentUser", JSON.stringify(currentUser))
       if (currentUser.role === "admin") {
         isAdmin.current = true
       } else {
         isAdmin.current = false
       }
     }
+
   }, [allUsers, username])
+
+  const current = JSON.parse(localStorage.getItem("currentUser"))
 
   const handleMute = (targetUser) => {
     socket.current.emit("toggle-mute", { targetUsername: targetUser.username, by: username });
@@ -356,6 +357,10 @@ const Home = () => {
       document.body.classList.add("dark-mode");
     }
   }, []);
+
+  const handleVideoCall = (user) => {
+
+  }
 
 
   return (
@@ -382,7 +387,7 @@ const Home = () => {
               <pre> Online{`(${[... new Set(onlineUsers)].length})`}</pre>
             </span>
           </span>
-          <div className="overflow-y-auto h-[800px] pr-1 mt-5 scroll">
+          <div className="overflow-y-auto pr-1 mt-5 flex-1">
             <ul className="space-y-3 flex-1 flex-col">
               <div>
                 {[...new Set(allUsers)]
@@ -398,16 +403,15 @@ const Home = () => {
                     );
                   })
                   .map(user => (
-                    <li key={uuidv4()} className="flex sideList items-center gap-2 py-2 rounded-md ">
-                      <span
-                        className={`w-3 h-3 ml-2 my-2 rounded-full ${onlineUsers.includes(user.username) ? "bg-green-500" : "bg-gray-400"
-                          }`}
-                      ></span>
+                    <li key={uuidv4()} className="flex sideList items-center gap-2 py-2 rounded-md my-2">
+                      <span className={`w-3 h-3 ml-2 my-2 rounded-full ${onlineUsers.includes(user.username) ? "bg-green-500" : "bg-gray-400"}`}></span>
                       <div className="flex items-center gap-2">
                         <div className="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center text-white text-sm font-bold uppercase">
                           {user.username.charAt(0)}
                         </div>
-                        <span className={`font-semibold ${user.role === "admin" ? "text-red-600" : ""}`}>{`${user.username} (You)`}</span>
+                        <span className={`font-semibold ${user.role === "admin" ? "text-red-600" : ""}`}>
+                          {`${user.username} (You)`}
+                        </span>
                       </div>
                     </li>
                   ))}
@@ -425,18 +429,19 @@ const Home = () => {
                     );
                   })
                   .map(user => (
-                    <li key={uuidv4()} className="sideList flex items-center gap-2 py-2 rounded">
+                    <li key={uuidv4()} className="sideList flex items-center gap-2 py-2 rounded my-1">
                       <span className={`w-3 h-3 ml-2 my-2 rounded-full ${onlineUsers.includes(user.username) ? "bg-green-500" : "bg-gray-400"}`}></span>
                       <div className="flex items-center gap-2">
-
                         <div className="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center text-white text-sm font-bold uppercase">
                           {user.username && user.username.charAt(0)}
                         </div>
-                        <span className={`${user.role === "admin" ? "text-red-600" : ""}`}>{user.username}</span>
+                        <span className={`${user.role === "admin" ? "text-red-600" : ""}`}>
+                          {user.username}
+                        </span>
                       </div>
                       <div className="admin flex gap-[15px] ml-auto pr-2">
                         <button>
-                          <IoVideocamSharp />
+                          <IoVideocamSharp onClick={handleVideoCall} />
                         </button>
                         {isAdmin.current &&
                           <div className="flex items-center gap-[15px]">
@@ -457,16 +462,17 @@ const Home = () => {
         </div>
       </div>
 
-      <div className="chat-window w-full">
+      <div className="chat-window w-full" onClick={() => { isOpen ? setisOpen(false) : "" }}>
 
-        {(currentUser && !currentUser.isMuted) &&
+        {(current && !current.isMuted) &&
 
           <div className="message-input">
             <textarea className="chat-input resize-none" onKeyDown={handleKeyDown} ref={textareaRef} value={value} onChange={handleChange} rows={1} placeholder="Type a message" />
             <button className="send-btn" onClick={handleClick}>Send</button>
           </div>
         }
-        {(currentUser && currentUser.isMuted) &&
+        {(current && current.isMuted) &&
+
           <div className="message-input justify-center">
             <span className="muteMessage">You have been muted by <span className="font-bold text-red-600">{localStorage.getItem("mutedBy")}</span></span>
           </div>

@@ -10,6 +10,7 @@ import { Server } from "socket.io"
 import Chat from "./models/Chat.js"
 import { v4 as uuidv4 } from "uuid"
 import { StreamChat } from "stream-chat"
+import Action from "./models/Action.js"
 
 dotenv.config()
 const app = express()
@@ -54,6 +55,30 @@ io.on('connection', socket => {
                     isMuted: user.isMuted,
                     mutedBy: by
                 });
+
+                await Action.findOneAndUpdate(
+                    {},
+                    {
+                        $push: {
+                            actions: {
+                                message: `${by} ${user.isMuted ? "muted" : "unmuted"} ${targetUsername}`,
+                                date: new Date().toLocaleDateString('en-IN', {
+                                    month: 'short',
+                                    year: 'numeric',
+                                    weekday: 'short',
+                                    day: '2-digit'
+                                }),
+                                time: new Date().toLocaleTimeString('en-IN', {
+                                    hour: '2-digit',
+                                    minute: '2-digit',
+                                    hour12: false
+                                })
+                            }
+                        }
+                    },
+                    { upsert: true, new: true }
+                );
+
             }
         } catch (error) {
             console.error("Error toggling mute:", error);
@@ -71,6 +96,30 @@ io.on('connection', socket => {
                     isBanned: user.isBanned,
                     bannedBy: by
                 });
+
+                await Action.findOneAndUpdate(
+                    {},
+                    {
+                        $push: {
+                            actions: {
+                                message: `${by} ${user.isBanned ? "banned" : "unbanned"} ${targetUsername}`,
+                                date: new Date().toLocaleDateString('en-IN', {
+                                    month: 'short',
+                                    year: 'numeric',
+                                    weekday: 'short',
+                                    day: '2-digit'
+                                }),
+                                time: new Date().toLocaleTimeString('en-IN', {
+                                    hour: '2-digit',
+                                    minute: '2-digit',
+                                    hour12: false
+                                })
+                            }
+                        }
+                    },
+                    { upsert: true, new: true }
+                );
+
 
             }
         } catch (error) {

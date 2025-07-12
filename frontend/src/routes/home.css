@@ -24,7 +24,7 @@
   --bg-sideBar: #0a0c1a;
   --sideBar-textColor: #ffffff;
   --sideHeader-textColor: #ffffff;
-  --bg-chatInput: #0f1a33;
+  --bg-chatInput: #0c1321;
   --chatInput-textColor: #ffffff; 
   --bg-messageInput: #2a3942;
   --placeholder-color: #aaa;
@@ -62,8 +62,9 @@
 .sideBar{
   scrollbar-width: none;
   background: var(--bg-sideBar);
-  color: var(--sideBar-textColor)
+  color: var(--sideBar-textColor);
 }
+
 
 .searchBar{
   width: 250px;
@@ -180,10 +181,6 @@ button:hover .icon{
   background-color: var(--messageColor-sent);
   align-self: flex-end;
   color: var(--messageText);
-}
-
-.scroll{
-  scrollbar-width: none;
 }
 
 
