@@ -26,6 +26,6 @@
 
 @keyframes slideLeft {
     from{
-        transform: translateX(100px);
+        transform: translateY(-100px);
     }
 }

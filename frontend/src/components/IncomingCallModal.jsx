@@ -2,7 +2,8 @@ import "./CallModal.css"
 
 const IncomingCallModal = ({ caller, onAccept, onReject }) => {
     return (
-        <div className="fixed bottom-25 right-3 z-50 border rounded-md shadow-lg p-4 w-[300px] box">
+        <div className="flex justify-center">
+        <div className="fixed top-17 z-50 border rounded-md shadow-lg p-4 w-[300px] box">
             <h2 className="text-lg font-semibold mb-2 h1">
                 Incoming Call 📞
             </h2>
@@ -17,6 +18,7 @@ const IncomingCallModal = ({ caller, onAccept, onReject }) => {
                     Reject
                 </button>
             </div>
+        </div>
         </div>
     );
 };

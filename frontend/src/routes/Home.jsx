@@ -11,9 +11,8 @@ import { PiChatSlashFill } from "react-icons/pi";
 import { MdDarkMode } from "react-icons/md";
 import { IoVideocamSharp } from "react-icons/io5";
 import { IoLogOutOutline } from "react-icons/io5";
-import { StreamVideoProvider } from "@stream-io/video-react-sdk";
 import IncomingCallModal from "../components/IncomingCallModal";
-import VideoCall from "../components/VideoCall";
+
 
 const Home = () => {
   const username = localStorage.getItem("username")
@@ -29,8 +28,6 @@ const Home = () => {
   const [allUsers, setAllUsers] = useState([])
   const [onlineUsers, setOnlineUsers] = useState([])
   const [searchValue, setSearchValue] = useState("")
-  const [streamClient, setStreamClient] = useState(null)
-  const [callObject, setCallObject] = useState(null)
   const [incomingCall, setIncomingCall] = useState(null)
 
 
@@ -198,6 +195,13 @@ const Home = () => {
 
     socket.current.on("incoming-call", async ({ callId, caller }) => {
       setIncomingCall({ callId, caller });
+      const interval = setTimeout(() => {
+        setIncomingCall(null)
+      }, 20000);
+    })
+
+    socket.current.on("call-rejected-alert", (username) => {
+      alert(`${username} rejected the call`)
     })
 
     return () => {
@@ -379,18 +383,8 @@ const Home = () => {
       "width=700,height=500"
     )
     socket.current.emit("incoming-call", { callId, caller: userId, callee: user.username })
+
   }
-
-  useEffect(() => {
-    const handleCallEnded = (event) => {
-      if (event.data?.type === "CALL_ENDED" && event.data.callId === incomingCall?.callId) {
-        setIncomingCall(null);
-      }
-    };
-
-    window.addEventListener("message", handleCallEnded);
-    return () => window.removeEventListener("message", handleCallEnded)
-  }, [incomingCall])
 
 
 
@@ -411,17 +405,11 @@ const Home = () => {
           }}
           onReject={() => {
             setIncomingCall(null)
+            socket.current.emit("call-rejected", username)
           }}
         />
       )}
 
-
-      <StreamVideoProvider client={streamClient} theme="dark">
-        {callObject && <VideoCall call={callObject} onEnd={() => {
-          callObject.leave();
-          setCallObject(null);
-        }} />}
-      </StreamVideoProvider>
 
       <div className={`sideBar fixed h-full top-0 left-0 w-[300px] bg-white shadow-xl z-50 transform transition-transform duration-250 ease-in-out ${isOpen ? 'translate-x-0' : '-translate-x-full'} rounded-r-sm overflow-y-auto`}>
 

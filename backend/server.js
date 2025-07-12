@@ -47,9 +47,11 @@ io.on('connection', socket => {
         const calleeSocketId = onlineUsers.get(callee)
         if (calleeSocketId){
             io.to(calleeSocketId).emit("incoming-call", {callId, caller})
-        } else {
-            console.log("callee not online");
         }
+    })
+
+    socket.on("call-rejected", (username) => {
+        socket.broadcast.emit("call-rejected-alert", username)
     })
 
     socket.on("toggle-mute", async ({ targetUsername, by }) => {

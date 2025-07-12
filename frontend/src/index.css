@@ -3,3 +3,9 @@
 button {
     cursor: pointer;
 }
+.str-video__generic-menu--item{
+    color: white;
+}
+.str-video__participant-details__name{
+    color: white;
+}
