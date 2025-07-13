@@ -165,6 +165,7 @@ const Home = () => {
         )
       );
       if (username === localStorage.getItem("username"))
+        localStorage.setItem("isMuted", isMuted)
         localStorage.setItem("mutedBy", mutedBy)
     });
 
@@ -179,18 +180,8 @@ const Home = () => {
         localStorage.setItem("isBanned", isBanned)
         localStorage.setItem("bannedBy", bannedBy)
       }
-      if (localStorage.getItem("isBanned") === "true") {
-        localStorage.removeItem("token")
-        alert(`You have been banned by ${localStorage.getItem("bannedBy")}`)
-        navigate("/login")
-      }
 
     })
-    if (localStorage.getItem("isBanned") === "true") {
-      localStorage.removeItem("token")
-      alert(`You have been banned by ${localStorage.getItem("bannedBy")}`)
-      navigate("/login")
-    }
 
 
     socket.current.on("incoming-call", async ({ callId, caller }) => {
@@ -214,10 +205,35 @@ const Home = () => {
       socket.current.off("user-list")
       socket.current.off("show-typing")
       socket.current.off("mute-status-updated")
+      clearInterval(interval)
     }
 
 
   }, [])
+
+  const [muted, setMuted] = useState(null)
+
+  useEffect(() => {
+    if (localStorage.getItem("isMuted")==="true"){
+      setMuted(true)
+    }
+    else {
+      setMuted(false)
+    }
+  
+
+  }, [localStorage.getItem("isMuted")])
+  
+
+  useEffect(() => {
+    if (localStorage.getItem("isBanned") === "true") {
+      localStorage.removeItem("token")
+      alert(`You have been banned by ${localStorage.getItem("bannedBy")}`)
+      navigate("/login")
+    }
+  
+  }, [localStorage.getItem("isBanned")])
+  
 
 
   useEffect(() => {
@@ -508,14 +524,14 @@ const Home = () => {
 
       <div className="chat-window w-full" onClick={() => { isOpen ? setisOpen(false) : "" }}>
 
-        {(current && !current.isMuted) &&
+        {(current && !muted) &&
 
           <div className="message-input">
             <textarea className="chat-input resize-none" onKeyDown={handleKeyDown} ref={textareaRef} value={value} onChange={handleChange} rows={1} placeholder="Type a message" />
             <button className="send-btn" onClick={handleClick}>Send</button>
           </div>
         }
-        {(current && current.isMuted) &&
+        {(current && muted) &&
 
           <div className="message-input justify-center">
             <span className="muteMessage">You have been muted by <span className="font-bold text-red-600">{localStorage.getItem("mutedBy")}</span></span>
