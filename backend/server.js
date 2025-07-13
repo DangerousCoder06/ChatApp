@@ -18,7 +18,7 @@ const app = express()
 const server = createServer(app)
 const io = new Server(server, {
     cors: {
-        origin: "http://localhost:5173"
+        origin: "*"
     }
 })
 const port = 3000
@@ -43,10 +43,10 @@ io.on('connection', socket => {
 
     })
 
-    socket.on("incoming-call", ({callee, callId, caller}) => {
+    socket.on("incoming-call", ({ callee, callId, caller }) => {
         const calleeSocketId = onlineUsers.get(callee)
-        if (calleeSocketId){
-            io.to(calleeSocketId).emit("incoming-call", {callId, caller})
+        if (calleeSocketId) {
+            io.to(calleeSocketId).emit("incoming-call", { callId, caller })
         }
     })
 
@@ -58,7 +58,7 @@ io.on('connection', socket => {
         socket.broadcast.emit("timeOut-response")
     })
 
-    socket.on("incoming-accepted", ()=>{
+    socket.on("incoming-accepted", () => {
         io.emit("clear-timeout")
     })
 
