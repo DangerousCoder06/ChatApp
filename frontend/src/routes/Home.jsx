@@ -88,7 +88,7 @@ const Home = () => {
       setMessages(chat)
     }
 
-    socket.current.emit("user-connected", username)
+    socket.current.emit("user-connected", {username, from:"chat"})
 
     socket.current.on("show-typing", (username) => {
       setIsTyping(username);

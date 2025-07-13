@@ -165,7 +165,10 @@ io.on('connection', socket => {
         socket.broadcast.emit("show-typing", username);
     });
 
-    socket.on('user-connected', async (username) => {
+    socket.on('user-connected', async ({ username, from }) => {
+        if (from != "chat") {
+            return;
+        }
 
         const users = await User.find({})
 
