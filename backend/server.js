@@ -54,6 +54,18 @@ io.on('connection', socket => {
         socket.broadcast.emit("call-rejected-alert", username)
     })
 
+    socket.on("timeOut", () => {
+        socket.broadcast.emit("timeOut-response")
+    })
+
+    socket.on("incoming-accepted", ()=>{
+        io.emit("clear-timeout")
+    })
+
+    socket.on("caller-hangUp", () => {
+        socket.broadcast.emit("incoming-null")
+    })
+
     socket.on("toggle-mute", async ({ targetUsername, by }) => {
         try {
             const user = await User.findOne({ username: targetUsername });

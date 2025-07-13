@@ -8,10 +8,15 @@ import {
 
 import { FaMicrophone, FaMicrophoneSlash, FaVideo, FaVideoSlash } from "react-icons/fa";
 import { ImPhoneHangUp } from "react-icons/im";
-import { useState } from "react";
+import { useRef, useState, useEffect } from "react";
+import { Socket } from "../utils/socket";
 import '@stream-io/video-react-sdk/dist/css/styles.css';
 
-const CustomCallControls = ({ onLeave }) => {
+
+
+const CustomCallControls = ({ onLeave, socket }) => {
+
+
     const call = useCall();
     const [isMute, setIsMute] = useState(false);
     const [videoOn, setVideoOn] = useState(true);
@@ -30,6 +35,7 @@ const CustomCallControls = ({ onLeave }) => {
 
     const leaveCall = async () => {
         await call.leave();
+        socket.emit("caller-hangUp")
         window.close();
     };
 
@@ -68,44 +74,67 @@ const MyFullscreenRemoteParticipant = ({ participant }) => {
     );
 };
 
-export default function VideoCall({ call, onEnd, caller, username }) {
+export default function VideoCall({ call, onEnd, caller, username, callee }) {
+    const socket = useRef()
+    socket.current = Socket
+
     return (
         <StreamTheme>
             <StreamCall call={call}>
-                <InnerCallUI onEnd={onEnd} caller={caller} username={username} />
+                <InnerCallUI onEnd={onEnd} caller={caller} username={username} socket={socket.current} callee={callee} />
             </StreamCall>
         </StreamTheme>
     );
 }
 
-const InnerCallUI = ({ onEnd, caller, username }) => {
-    const [timeOut, settimeOut] = useState(null)
-    setTimeout(() => {
-        settimeOut(true)
-    }, 20000);
+const InnerCallUI = ({ onEnd, caller, username, socket, callee }) => {
+
+    const [timeOut, setTimeOut] = useState(null)
+    const [onlineUsers, setOnlineUsers] = useState([])
+    const [hasDisconnected, setHasDisconnected] = useState(null)
+    
+    useEffect(() => {
+        socket.emit("user-connected", username)
+
+        socket.on("timeOut-response", () => {
+            window.close()
+            alert("Call not answered")
+        })
+
+        socket.on("user-list", ({ onlineUsers }) => {
+            setOnlineUsers(onlineUsers)   
+        })
+
+
+        return () => {
+            socket.off("timeOut-response")
+            socket.off("user-list")
+            socket.off("user-connected")
+        }
+
+    }, [])
+
     const { useLocalParticipant, useRemoteParticipants } = useCallStateHooks();
     const localParticipant = useLocalParticipant();
     const remoteParticipants = useRemoteParticipants();
 
-    const isRinging = remoteParticipants.length === 0 ? true : false
+    const isRinging = remoteParticipants.length === 0 && !timeOut ? true : false
 
     return (
         <div className="w-full h-screen relative bg-black overflow-hidden">
-            {isRinging && !timeOut && (caller === username) &&
-                <div className="flex justify-center h-screen items-center">
-                    <span className="text-white font-semibold text-lg">Ringing...</span>
+            {isRinging && (caller === username) &&
+                <div className="flex justify-center items-center absolute z-10 w-screen top-5">
+                    <span className="text-white font-normal text-lg">
+                        {onlineUsers.includes(callee) ? "Ringing..." : "Calling..."}
+                    </span>
                 </div>
             }
-            {timeOut &&
-                <div>
-                    <div className="flex justify-center h-screen items-center">
-                        <span className="text-white font-semibold text-lg">Not answered</span>
-                    </div>
-                </div>
-            }
+
+
             <MyFullscreenRemoteParticipant participant={remoteParticipants[0]} />
-            <MyFloatingLocalParticipant className="rounded-lg" participant={localParticipant} />
-            <CustomCallControls onLeave={onEnd} />
+            {isRinging ? <MyFullscreenRemoteParticipant participant={localParticipant} /> : <MyFloatingLocalParticipant className="rounded-lg" participant={localParticipant} />}
+
+            <CustomCallControls onLeave={onEnd} socket={socket} />
         </div>
     );
 };

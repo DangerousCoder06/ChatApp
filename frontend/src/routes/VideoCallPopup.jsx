@@ -52,7 +52,7 @@ const VideoCallPopup = () => {
   }
 
   return (
-    <StreamVideoProvider client={streamClient} theme="dark">
+    <StreamVideoProvider client={streamClient}>
       <VideoCall
         call={callObject}
         onEnd={() => {
@@ -61,6 +61,7 @@ const VideoCallPopup = () => {
         }}
         caller = {caller}
         username = {username}
+        callee = {callee}
       />
     </StreamVideoProvider>
   );

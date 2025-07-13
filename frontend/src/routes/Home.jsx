@@ -12,6 +12,7 @@ import { MdDarkMode } from "react-icons/md";
 import { IoVideocamSharp } from "react-icons/io5";
 import { IoLogOutOutline } from "react-icons/io5";
 import IncomingCallModal from "../components/IncomingCallModal";
+import { Socket } from "../utils/socket";
 
 
 const Home = () => {
@@ -20,6 +21,7 @@ const Home = () => {
   const navigate = useNavigate()
 
   const socket = useRef()
+  socket.current = Socket
 
 
   const textareaRef = useRef(null)
@@ -66,6 +68,8 @@ const Home = () => {
   const [isTyping, setIsTyping] = useState();
   const containerRef = useRef();
 
+  const settimeoutRef = useRef(null)
+
 
   useEffect(() => {
     const container = containerRef.current;
@@ -84,10 +88,7 @@ const Home = () => {
       setMessages(chat)
     }
 
-    if (!socket.current) {
-      socket.current = io("http://localhost:3000")
-      socket.current.emit("user-connected", username)
-    }
+    socket.current.emit("user-connected", username)
 
     socket.current.on("show-typing", (username) => {
       setIsTyping(username);
@@ -166,7 +167,7 @@ const Home = () => {
       );
       if (username === localStorage.getItem("username"))
         localStorage.setItem("isMuted", isMuted)
-        localStorage.setItem("mutedBy", mutedBy)
+      localStorage.setItem("mutedBy", mutedBy)
     });
 
     socket.current.on("ban-status-updated", ({ username, isBanned, bannedBy }) => {
@@ -183,16 +184,25 @@ const Home = () => {
 
     })
 
-
     socket.current.on("incoming-call", async ({ callId, caller }) => {
       setIncomingCall({ callId, caller });
-      const interval = setTimeout(() => {
+      settimeoutRef.current = setTimeout(() => {
         setIncomingCall(null)
+        socket.current.emit("timeOut")
       }, 20000);
+
     })
 
+    socket.current.on("clear-timeout", () => {
+      clearTimeout(settimeoutRef.current)
+    })
+    
     socket.current.on("call-rejected-alert", (username) => {
       alert(`${username} rejected the call`)
+    })
+
+    socket.current.on("incoming-null", () => {
+      setIncomingCall(null)
     })
 
     return () => {
@@ -205,25 +215,25 @@ const Home = () => {
       socket.current.off("user-list")
       socket.current.off("show-typing")
       socket.current.off("mute-status-updated")
-      clearInterval(interval)
+      socket.current.off("incoming-null")
+      socket.current.off("clear-timeout")
     }
-
 
   }, [])
 
   const [muted, setMuted] = useState(null)
 
   useEffect(() => {
-    if (localStorage.getItem("isMuted")==="true"){
+    if (localStorage.getItem("isMuted") === "true") {
       setMuted(true)
     }
     else {
       setMuted(false)
     }
-  
+
 
   }, [localStorage.getItem("isMuted")])
-  
+
 
   useEffect(() => {
     if (localStorage.getItem("isBanned") === "true") {
@@ -231,10 +241,8 @@ const Home = () => {
       alert(`You have been banned by ${localStorage.getItem("bannedBy")}`)
       navigate("/login")
     }
-  
-  }, [localStorage.getItem("isBanned")])
-  
 
+  }, [localStorage.getItem("isBanned")])
 
   useEffect(() => {
     localStorage.setItem("message", JSON.stringify(messages))
@@ -402,8 +410,6 @@ const Home = () => {
 
   }
 
-
-
   return (
 
     <div className="relative">
@@ -416,8 +422,9 @@ const Home = () => {
               "_blank",
               "width=700,height=500"
             );
-
+            
             setIncomingCall(null)
+            socket.current.emit("incoming-accepted")
           }}
           onReject={() => {
             setIncomingCall(null)
