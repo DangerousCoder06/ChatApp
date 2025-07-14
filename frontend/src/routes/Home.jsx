@@ -12,7 +12,7 @@ import { MdDarkMode } from "react-icons/md";
 import { IoVideocamSharp } from "react-icons/io5";
 import { IoLogOutOutline } from "react-icons/io5";
 import IncomingCallModal from "../components/IncomingCallModal";
-import { Socket } from "../utils/socket";
+import {createSocket} from "../utils/socket";
 
 
 const Home = () => {
@@ -21,8 +21,6 @@ const Home = () => {
   const navigate = useNavigate()
 
   const socket = useRef()
-  socket.current = Socket
-
 
   const textareaRef = useRef(null)
   const textarea = textareaRef.current;
@@ -31,6 +29,7 @@ const Home = () => {
   const [onlineUsers, setOnlineUsers] = useState([])
   const [searchValue, setSearchValue] = useState("")
   const [incomingCall, setIncomingCall] = useState(null)
+  const [hasRendered, setHasRendered] = useState(null)
 
 
   const isTabActiveRef = useRef(document.visibilityState === "visible")
@@ -62,8 +61,6 @@ const Home = () => {
     };
   }, []);
 
-  const currentUser = allUsers.find(u => u.username === username)
-
   const [messages, setMessages] = useState([])
   const [isTyping, setIsTyping] = useState();
   const containerRef = useRef();
@@ -88,7 +85,7 @@ const Home = () => {
       setMessages(chat)
     }
 
-    socket.current.emit("user-connected", {username, from:"chat"})
+    socket.current = createSocket()
 
     socket.current.on("show-typing", (username) => {
       setIsTyping(username);
@@ -149,7 +146,10 @@ const Home = () => {
     socket.current.on("user-list", ({ allUsers, onlineUsers }) => {
       setAllUsers(allUsers)
       setOnlineUsers(onlineUsers)
+      setHasRendered(true)
     })
+
+    socket.current.emit("user-connected", { username, from: "chat" })
 
     socket.current.on('joined', (message) => {
       setMessages(messages => [...messages, message])
@@ -196,7 +196,7 @@ const Home = () => {
     socket.current.on("clear-timeout", () => {
       clearTimeout(settimeoutRef.current)
     })
-    
+
     socket.current.on("call-rejected-alert", (username) => {
       alert(`${username} rejected the call`)
     })
@@ -217,6 +217,7 @@ const Home = () => {
       socket.current.off("mute-status-updated")
       socket.current.off("incoming-null")
       socket.current.off("clear-timeout")
+      socket.current.disconnect()
     }
 
   }, [])
@@ -422,7 +423,7 @@ const Home = () => {
               "_blank",
               "width=700,height=500"
             );
-            
+
             setIncomingCall(null)
             socket.current.emit("incoming-accepted")
           }}
@@ -455,76 +456,78 @@ const Home = () => {
             </span>
           </span>
           <div className="overflow-y-auto pr-1 mt-5 flex-1">
-            <ul className="space-y-3 flex-1 flex-col">
-              <div>
-                {[...new Set(allUsers)]
-                  .filter(user => user.username === username)
-                  .filter(user => {
-                    const lowerSearch = searchValue.toLowerCase();
-                    const isOnline = onlineUsers.includes(user);
+            {hasRendered &&
+              <ul className="space-y-3 flex-1 flex-col">
+                <div>
+                  {[...new Set(allUsers)]
+                    .filter(user => user.username === username)
+                    .filter(user => {
+                      const lowerSearch = searchValue.toLowerCase();
+                      const isOnline = onlineUsers.includes(user);
 
-                    if (lowerSearch === "online") return isOnline;
-                    if (lowerSearch === "offline") return !isOnline;
-                    return [...lowerSearch].every(char =>
-                      user.username.toLowerCase().includes(char)
-                    );
-                  })
-                  .map(user => (
-                    <li key={uuidv4()} className="flex sideList items-center gap-2 py-2 rounded-md my-2">
-                      <span className={`w-3 h-3 ml-2 my-2 rounded-full ${onlineUsers.includes(user.username) ? "bg-green-500" : "bg-gray-400"}`}></span>
-                      <div className="flex items-center gap-2">
-                        <div className="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center text-white text-sm font-bold uppercase">
-                          {user.username.charAt(0)}
-                        </div>
-                        <span className={`font-semibold ${user.role === "admin" ? "text-red-600" : ""}`}>
-                          {`${user.username} (You)`}
-                        </span>
-                      </div>
-                    </li>
-                  ))}
-
-                {[...new Set(allUsers)]
-                  .filter(user => user.username != username)
-                  .filter(user => {
-                    const lowerSearch = searchValue.toLowerCase();
-                    const isOnline = onlineUsers.includes(user.username);
-
-                    if (lowerSearch === "online") return isOnline;
-                    if (lowerSearch === "offline") return !isOnline;
-                    return [...lowerSearch].every(char =>
-                      user.username.toLowerCase().includes(char)
-                    );
-                  })
-                  .map(user => (
-                    <li key={uuidv4()} className="sideList flex items-center gap-2 py-2 rounded my-1">
-                      <span className={`w-3 h-3 ml-2 my-2 rounded-full ${onlineUsers.includes(user.username) ? "bg-green-500" : "bg-gray-400"}`}></span>
-                      <div className="flex items-center gap-2">
-                        <div className="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center text-white text-sm font-bold uppercase">
-                          {user.username && user.username.charAt(0)}
-                        </div>
-                        <span className={`${user.role === "admin" ? "text-red-600" : ""}`}>
-                          {user.username}
-                        </span>
-                      </div>
-                      <div className="admin flex gap-[15px] ml-auto pr-2">
-                        <button onClick={() => handleVideoCall(user)}>
-                          <IoVideocamSharp className="icon" />
-                        </button>
-                        {isAdmin.current &&
-                          <div className="flex items-center gap-[15px]">
-                            <button onClick={() => handleMute(user)}>
-                              <PiChatSlashFill className="icon" color={user.isMuted ? "red" : ""} />
-                            </button>
-                            <button onClick={() => handleBan(user)}>
-                              <FaBan className="icon" color={user.isBanned ? "red" : ""} />
-                            </button>
+                      if (lowerSearch === "online") return isOnline;
+                      if (lowerSearch === "offline") return !isOnline;
+                      return [...lowerSearch].every(char =>
+                        user.username.toLowerCase().includes(char)
+                      );
+                    })
+                    .map(user => (
+                      <li key={uuidv4()} className="flex sideList items-center gap-2 py-2 rounded-md my-2">
+                        <span className={`w-3 h-3 ml-2 my-2 rounded-full ${onlineUsers.includes(user.username) ? "bg-green-500" : "bg-gray-400"}`}></span>
+                        <div className="flex items-center gap-2">
+                          <div className="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center text-white text-sm font-bold uppercase">
+                            {user.username.charAt(0)}
                           </div>
-                        }
-                      </div>
-                    </li>
-                  ))}
-              </div>
-            </ul>
+                          <span className={`font-semibold ${user.role === "admin" ? "text-red-600" : ""}`}>
+                            {`${user.username} (You)`}
+                          </span>
+                        </div>
+                      </li>
+                    ))}
+
+                  {[...new Set(allUsers)]
+                    .filter(user => user.username != username)
+                    .filter(user => {
+                      const lowerSearch = searchValue.toLowerCase();
+                      const isOnline = onlineUsers.includes(user.username);
+
+                      if (lowerSearch === "online") return isOnline;
+                      if (lowerSearch === "offline") return !isOnline;
+                      return [...lowerSearch].every(char =>
+                        user.username.toLowerCase().includes(char)
+                      );
+                    })
+                    .map(user => (
+                      <li key={uuidv4()} className="sideList flex items-center gap-2 py-2 rounded my-1">
+                        <span className={`w-3 h-3 ml-2 my-2 rounded-full ${onlineUsers.includes(user.username) ? "bg-green-500" : "bg-gray-400"}`}></span>
+                        <div className="flex items-center gap-2">
+                          <div className="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center text-white text-sm font-bold uppercase">
+                            {user.username && user.username.charAt(0)}
+                          </div>
+                          <span className={`${user.role === "admin" ? "text-red-600" : ""}`}>
+                            {user.username}
+                          </span>
+                        </div>
+                        <div className="admin flex gap-[15px] ml-auto pr-2">
+                          <button onClick={() => handleVideoCall(user)}>
+                            <IoVideocamSharp className="icon" />
+                          </button>
+                          {isAdmin.current &&
+                            <div className="flex items-center gap-[15px]">
+                              <button onClick={() => handleMute(user)}>
+                                <PiChatSlashFill className="icon" color={user.isMuted ? "red" : ""} />
+                              </button>
+                              <button onClick={() => handleBan(user)}>
+                                <FaBan className="icon" color={user.isBanned ? "red" : ""} />
+                              </button>
+                            </div>
+                          }
+                        </div>
+                      </li>
+                    ))}
+                </div>
+              </ul>
+            }
           </div>
         </div>
       </div>

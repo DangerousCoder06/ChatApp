@@ -9,13 +9,10 @@ import {
 import { FaMicrophone, FaMicrophoneSlash, FaVideo, FaVideoSlash } from "react-icons/fa";
 import { ImPhoneHangUp } from "react-icons/im";
 import { useRef, useState, useEffect } from "react";
-import { Socket } from "../utils/socket";
+import { createSocket } from "../utils/socket";
 import '@stream-io/video-react-sdk/dist/css/styles.css';
 
-
-
-const CustomCallControls = ({ onLeave, socket }) => {
-
+const CustomCallControls = ({ socket }) => {
 
     const call = useCall();
     const [isMute, setIsMute] = useState(false);
@@ -76,7 +73,7 @@ const MyFullscreenRemoteParticipant = ({ participant }) => {
 
 export default function VideoCall({ call, onEnd, caller, username, callee }) {
     const socket = useRef()
-    socket.current = Socket
+    socket.current = createSocket()
 
     return (
         <StreamTheme>
@@ -89,12 +86,11 @@ export default function VideoCall({ call, onEnd, caller, username, callee }) {
 
 const InnerCallUI = ({ onEnd, caller, username, socket, callee }) => {
 
-    const [timeOut, setTimeOut] = useState(null)
     const [onlineUsers, setOnlineUsers] = useState([])
-    const [hasDisconnected, setHasDisconnected] = useState(null)
-    
+    const audioRef = useRef()
+
     useEffect(() => {
-        socket.emit("user-connected", username)
+        socket.emit("user-connected", { username, from: "video" })
 
         socket.on("timeOut-response", () => {
             window.close()
@@ -102,14 +98,23 @@ const InnerCallUI = ({ onEnd, caller, username, socket, callee }) => {
         })
 
         socket.on("user-list", ({ onlineUsers }) => {
-            setOnlineUsers(onlineUsers)   
+            setOnlineUsers(onlineUsers)
         })
 
+        socket.on("disconnect-alert", (disconnectedUser) => {
+            audioRef.current.pause()
+            alert(`${disconnectedUser} disconnected`)
+            window.close()
+        })
+
+        if (isRinging){
+            audioRef.current.play()
+        }
 
         return () => {
             socket.off("timeOut-response")
             socket.off("user-list")
-            socket.off("user-connected")
+            socket.off("disconnect-alert")
         }
 
     }, [])
@@ -118,7 +123,7 @@ const InnerCallUI = ({ onEnd, caller, username, socket, callee }) => {
     const localParticipant = useLocalParticipant();
     const remoteParticipants = useRemoteParticipants();
 
-    const isRinging = remoteParticipants.length === 0 && !timeOut ? true : false
+    const isRinging = remoteParticipants.length === 0 ? true : false
 
     return (
         <div className="w-full h-screen relative bg-black overflow-hidden">
@@ -127,14 +132,13 @@ const InnerCallUI = ({ onEnd, caller, username, socket, callee }) => {
                     <span className="text-white font-normal text-lg">
                         {onlineUsers.includes(callee) ? "Ringing..." : "Calling..."}
                     </span>
+                    <audio ref={audioRef} src="/ring.mp3" loop></audio>
                 </div>
             }
-
-
             <MyFullscreenRemoteParticipant participant={remoteParticipants[0]} />
             {isRinging ? <MyFullscreenRemoteParticipant participant={localParticipant} /> : <MyFloatingLocalParticipant className="rounded-lg" participant={localParticipant} />}
 
-            <CustomCallControls onLeave={onEnd} socket={socket} />
+            <CustomCallControls socket={socket} />
         </div>
     );
 };

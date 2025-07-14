@@ -150,7 +150,6 @@ io.on('connection', socket => {
         }
     });
 
-
     socket.on('status', async msg => {
 
         await Chat.findOneAndUpdate(
@@ -166,9 +165,6 @@ io.on('connection', socket => {
     });
 
     socket.on('user-connected', async ({ username, from }) => {
-        if (from != "chat") {
-            return;
-        }
 
         const users = await User.find({})
 
@@ -193,7 +189,6 @@ io.on('connection', socket => {
 
         socket.broadcast.emit("user-online", username);
 
-
         const joinMessage = {
             id: uuidv4(),
             message: `${username} joined the chat`,
@@ -204,15 +199,27 @@ io.on('connection', socket => {
             }),
             sender: username
         }
-        io.emit('joined', joinMessage)
+        if (from === "chat") {
+            io.emit('joined', joinMessage)
+        }
 
         socket.on("disconnect", () => {
-            onlineUsers.delete(socket.id)
+            if (from === "chat") {
+                for (const [username, id] of onlineUsers) {
+                    if (id === socket.id) {
+                        onlineUsers.delete(username)
+                    }
+                }
+            }
 
             io.emit("user-list", {
                 onlineUsers: Array.from(onlineUsers.keys()),
                 allUsers
             })
+
+            if (from === "video") {
+                socket.broadcast.emit("disconnect-alert", username)
+            }
 
             const leftMessage = {
                 id: uuidv4(),
@@ -222,7 +229,9 @@ io.on('connection', socket => {
                     weekday: 'short', day: '2-digit', month: 'short', year: 'numeric'
                 })
             }
-            socket.broadcast.emit('left', leftMessage)
+            if (from === "chat") {
+                socket.broadcast.emit('left', leftMessage)
+            }
         })
     })
 
