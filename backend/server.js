@@ -297,10 +297,6 @@ app.get('/verify', Auth, async (req, res) => {
     res.json(req.user.username)
 })
 
-
-
-// server.listen(port, () => {
-//     console.log(`Example app listening on port ${port}`)
-// })
-
-export default app;
+server.listen(port, () => {
+    console.log(`Example app listening on port ${port}`)
+})
