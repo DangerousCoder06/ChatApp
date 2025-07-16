@@ -50,7 +50,7 @@
 
 .chat-window {
   display: flex;
-  flex-direction: column;
+  flex-direction: column-reverse;
   height: 100dvh;
   background: var(--bg-chatWindow);
   padding-bottom: 0;
