@@ -107,7 +107,7 @@ const InnerCallUI = ({ onEnd, caller, username, socket, callee }) => {
             window.close()
         })
 
-        if (isRinging){
+        if (isRinging && audioRef.current){
             audioRef.current.play()
         }
 
