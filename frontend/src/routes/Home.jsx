@@ -196,9 +196,6 @@ const Home = () => {
       clearTimeout(settimeoutRef.current)
     })
 
-    socket.current.on("call-rejected-alert", (username) => {
-      alert(`${username} rejected the call`)
-    })
 
     socket.current.on("incoming-null", () => {
       setIncomingCall(null)
@@ -424,7 +421,7 @@ const Home = () => {
             );
 
             setIncomingCall(null)
-            socket.current.emit("incoming-accepted")
+            clearTimeout(settimeoutRef.current)
           }}
           onReject={() => {
             setIncomingCall(null)
