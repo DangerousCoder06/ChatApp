@@ -105,14 +105,15 @@ button:hover .icon{
   padding: 12px 16px;
   background-color: var(--bg-messageInput);
   border-top: 1px solid #ccc;
-  position: absolute;
+  /* position: absolute;
   bottom: 0px; 
-  z-index: 10;
+  z-index: 10; */
   width: 100%;
   backdrop-filter: blur(8px);
   box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.05);
   align-items: flex-end;
   border: 0px;
+  margin-bottom: auto;
 }
 
 .chat-input::placeholder {
