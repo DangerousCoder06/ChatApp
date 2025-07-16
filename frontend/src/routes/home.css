@@ -98,7 +98,7 @@ button:hover .icon{
   padding: 12px 16px;
   background-color: var(--bg-messageInput);
   border-top: 1px solid #ccc;
-  position: fixed;
+  position: sticky;
   bottom: 0px;
   z-index: 10;
   width: 100vw;
