@@ -56,7 +56,7 @@ const CustomCallControls = ({ socket }) => {
 const MyFloatingLocalParticipant = ({ participant }) => {
     if (!participant) return null;
     return (
-        <div className="absolute bottom-4 right-4 w-48 h-32 z-10 rounded overflow-hidden border-2 border-white shadow-lg bg-black">
+        <div className="absolute flex top-4 right-4 w-28 h-35 sm:w-48 sm:h-32 z-10 rounded overflow-hidden border-2 border-white shadow-lg bg-black">
             <ParticipantView participant={participant} />
         </div>
     );
@@ -65,7 +65,7 @@ const MyFloatingLocalParticipant = ({ participant }) => {
 const MyFullscreenRemoteParticipant = ({ participant }) => {
     if (!participant) return null;
     return (
-        <div className="absolute inset-0 z-0">
+        <div className="absolute inset-0 z-0 flex justify-center">
             <ParticipantView participant={participant} />
         </div>
     );
