@@ -86,6 +86,7 @@ const Home = () => {
     }
 
     socket.current = createSocket()
+    socket.current.emit("user-connected", { username, from: "chat", token: localStorage.getItem("token") })
 
     socket.current.on("show-typing", (username) => {
       setIsTyping(username);
@@ -149,7 +150,6 @@ const Home = () => {
       setHasRendered(true)
     })
 
-    socket.current.emit("user-connected", { username, from: "chat" })
 
     socket.current.on('joined', (message) => {
       setMessages(messages => [...messages, message])

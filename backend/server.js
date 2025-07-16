@@ -164,12 +164,12 @@ io.on('connection', socket => {
         socket.broadcast.emit("show-typing", username);
     });
 
-    socket.on('user-connected', async ({ username, from }) => {
+    socket.on('user-connected', async ({ username, from, token }) => {
 
         const users = await User.find({})
 
         const user = await User.findOne({ username })
-        if (user.isBanned) {
+        if (user.isBanned || !token) {
             return
         }
 
