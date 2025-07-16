@@ -12,7 +12,7 @@ import { MdDarkMode } from "react-icons/md";
 import { IoVideocamSharp } from "react-icons/io5";
 import { IoLogOutOutline } from "react-icons/io5";
 import IncomingCallModal from "../components/IncomingCallModal";
-import { createSocket } from "../utils/socket";
+import {createSocket} from "../utils/socket";
 
 
 const Home = () => {
@@ -83,17 +83,17 @@ const Home = () => {
       const chat = JSON.parse(localStorage.getItem("message"))
       setMessages(chat)
     }
-
+    
     socket.current = createSocket()
     socket.current.emit("user-connected", { username, from: "chat", token: localStorage.getItem("token") })
-
+    
     socket.current.on("show-typing", (username) => {
       setIsTyping(username);
       setTimeout(() => setIsTyping(null), 1500)
     })
-
+    
     socket.current.on('connect', () => {
-
+      
       setMessages(prevMessages => {
         const updatedMessages = prevMessages.map(msg => {
           if (msg.status === "pending" && msg.sender === username) {
@@ -148,7 +148,7 @@ const Home = () => {
       setOnlineUsers(onlineUsers)
       setHasRendered(true)
     })
-
+    
 
     socket.current.on('joined', (message) => {
       setMessages(messages => [...messages, message])
@@ -196,6 +196,9 @@ const Home = () => {
       clearTimeout(settimeoutRef.current)
     })
 
+    socket.current.on("call-rejected-alert", (username) => {
+      alert(`${username} rejected the call`)
+    })
 
     socket.current.on("incoming-null", () => {
       setIncomingCall(null)
@@ -421,7 +424,7 @@ const Home = () => {
             );
 
             setIncomingCall(null)
-            clearTimeout(settimeoutRef.current)
+            socket.current.emit("incoming-accepted")
           }}
           onReject={() => {
             setIncomingCall(null)
@@ -530,38 +533,20 @@ const Home = () => {
 
       <div className="chat-window w-full" onClick={() => { isOpen ? setisOpen(false) : "" }}>
 
+        {(current && !muted) &&
 
-        <nav className="navbar flex justify-between items-center sticky top-0">
-          <button onClick={() => setisOpen(true)} className="hamBurger cursor-pointer p-3 rounded-full hover:bg-gray-200"><RxHamburgerMenu className="icon" /></button>
-          <div>
-            {socket.current && socket.current.connected ?
-              <span className="flex justify-center items-center px-3 text-green-800 text-[16px] font-semibold">
-                <span className="flex items-center">
+          <div className="message-input">
+            <textarea className="chat-input resize-none" onKeyDown={handleKeyDown} ref={textareaRef} value={value} onChange={handleChange} rows={1} placeholder="Type a message" />
+            <button className="send-btn" onClick={handleClick}>Send</button>
+          </div>
+        }
+        {(current && muted) &&
 
-                  <span className="text-base animate-pulse w-4 h-4 rounded-full bg-green-500"></span>
-                  <span>
-                    <pre> Online</pre>
-                  </span>
-                </span>
-              </span> : (
-                <>
-                  <span className="flex justify-center items-center px-3 text-green-800 text-[16px] font-semibold">
-                    <span className="text-base animate-pulse w-4 h-4 rounded-full bg-red-500"></span>
-                    <span>
-                      <pre> Offline</pre>
-                    </span>
-                  </span>
-                  <div className="text-xs text-red-600 mt-1 ml-2">Please check your connection</div>
-                </>
-              )
-            }
+          <div className="message-input justify-center">
+            <span className="muteMessage">You have been muted by <span className="font-bold text-red-600">{localStorage.getItem("mutedBy")}</span></span>
           </div>
-          <div>
-            <button className="p-3 rounded-full hover:bg-gray-300 transition-all duration-200" onClick={toggleDark}>
-              <MdDarkMode className="icon" />
-            </button>
-          </div>
-        </nav>
+        }
+
         <div ref={containerRef} className="messages-container">
 
           {messages.map((item, index) => {
@@ -631,19 +616,37 @@ const Home = () => {
 
         </div>
 
-        {(current && !muted) &&
+        <nav className="navbar flex justify-between items-center sticky top-0">
+          <button onClick={() => setisOpen(true)} className="hamBurger cursor-pointer p-3 rounded-full hover:bg-gray-200"><RxHamburgerMenu className="icon" /></button>
+          <div>
+            {socket.current && socket.current.connected ?
+              <span className="flex justify-center items-center px-3 text-green-800 text-[16px] font-semibold">
+                <span className="flex items-center">
 
-          <div className="message-input">
-            <textarea className="chat-input resize-none" onKeyDown={handleKeyDown} ref={textareaRef} value={value} onChange={handleChange} rows={1} placeholder="Type a message" />
-            <button className="send-btn" onClick={handleClick}>Send</button>
+                  <span className="text-base animate-pulse w-4 h-4 rounded-full bg-green-500"></span>
+                  <span>
+                    <pre> Online</pre>
+                  </span>
+                </span>
+              </span> : (
+                <>
+                  <span className="flex justify-center items-center px-3 text-green-800 text-[16px] font-semibold">
+                    <span className="text-base animate-pulse w-4 h-4 rounded-full bg-red-500"></span>
+                    <span>
+                      <pre> Offline</pre>
+                    </span>
+                  </span>
+                  <div className="text-xs text-red-600 mt-1 ml-2">Please check your connection</div>
+                </>
+              )
+            }
           </div>
-        }
-        {(current && muted) &&
-
-          <div className="message-input justify-center">
-            <span className="muteMessage">You have been muted by <span className="font-bold text-red-600">{localStorage.getItem("mutedBy")}</span></span>
+          <div>
+            <button className="p-3 rounded-full hover:bg-gray-300 transition-all duration-200" onClick={toggleDark}>
+              <MdDarkMode className="icon" />
+            </button>
           </div>
-        }
+        </nav>
       </div>
 
     </div>

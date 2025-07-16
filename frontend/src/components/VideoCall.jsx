@@ -56,7 +56,7 @@ const CustomCallControls = ({ socket }) => {
 const MyFloatingLocalParticipant = ({ participant }) => {
     if (!participant) return null;
     return (
-        <div className="absolute flex top-4 right-4 sm:w-48 sm:h-32 z-10 w-25 h-35 rounded overflow-hidden border-2 border-white shadow-lg bg-black">
+        <div className="absolute bottom-4 right-4 w-48 h-32 z-10 rounded overflow-hidden border-2 border-white shadow-lg bg-black">
             <ParticipantView participant={participant} />
         </div>
     );
@@ -65,7 +65,7 @@ const MyFloatingLocalParticipant = ({ participant }) => {
 const MyFullscreenRemoteParticipant = ({ participant }) => {
     if (!participant) return null;
     return (
-        <div className="absolute inset-0 z-0 flex justify-center">
+        <div className="absolute inset-0 z-0">
             <ParticipantView participant={participant} />
         </div>
     );
@@ -87,7 +87,6 @@ export default function VideoCall({ call, onEnd, caller, username, callee }) {
 const InnerCallUI = ({ onEnd, caller, username, socket, callee }) => {
 
     const [onlineUsers, setOnlineUsers] = useState([])
-    const [isVisible, setisVisible] = useState()
     const audioRef = useRef()
 
     useEffect(() => {
@@ -108,12 +107,7 @@ const InnerCallUI = ({ onEnd, caller, username, socket, callee }) => {
             window.close()
         })
 
-        socket.on("call-rejected-alert", (username) => {
-            alert(`${username} rejected the call`)
-            window.close()
-        })
-
-        if (isRinging && audioRef.current) {
+        if (isRinging && audioRef.current){
             audioRef.current.play()
         }
 
@@ -121,7 +115,6 @@ const InnerCallUI = ({ onEnd, caller, username, socket, callee }) => {
             socket.off("timeOut-response")
             socket.off("user-list")
             socket.off("disconnect-alert")
-            socket.off("call-rejected-alert")
         }
 
     }, [])
