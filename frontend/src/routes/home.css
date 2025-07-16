@@ -55,7 +55,7 @@
   background: var(--bg-chatWindow);
   padding-bottom: 16px;
   box-sizing: border-box;
-  overflow: hidden;
+  overflow-x: hidden;
   position: relative;
 }
 
@@ -105,7 +105,7 @@ button:hover .icon{
   padding: 12px 16px;
   background-color: var(--bg-messageInput);
   border-top: 1px solid #ccc;
-  /* position: absolute;
+  /* position: fixed;
   bottom: 0px; 
   z-index: 10; */
   width: 100%;
@@ -113,16 +113,12 @@ button:hover .icon{
   box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.05);
   align-items: flex-end;
   border: 0px;
-  margin-bottom: auto;
 }
 
 .chat-input::placeholder {
   color: var(--placeholder-color);
   
 }
-
-
-
 
 .chat-input {
   flex: 1;
@@ -244,20 +240,3 @@ body {
     max-width: 700px;
   }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
