@@ -50,13 +50,14 @@
 
 .chat-window {
   display: flex;
-  flex-direction: column;
+  flex-direction: column-reverse;
   height: 100dvh;
   background: var(--bg-chatWindow);
   padding-bottom: 16px;
   box-sizing: border-box;
   overflow: hidden;
   position: relative;
+  flex: 1;
 }
 
 .sideBar{
