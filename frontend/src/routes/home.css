@@ -53,25 +53,16 @@
   flex-direction: column;
   height: 100dvh;
   background: var(--bg-chatWindow);
-  padding-bottom: 16px;
+  padding-bottom: 0;
   box-sizing: border-box;
-  overflow-x: hidden;
-  position: relative;
 }
+
 
 .sideBar{
   scrollbar-width: none;
   background: var(--bg-sideBar);
   color: var(--sideBar-textColor);
 }
-
-html, body {
-  height: 100%;
-  margin: 0;
-  padding: 0;
-}
-
-
 
 .searchBar{
   width: 250px;
@@ -105,15 +96,15 @@ button:hover .icon{
   padding: 12px 16px;
   background-color: var(--bg-messageInput);
   border-top: 1px solid #ccc;
-  /* position: fixed;
-  bottom: 0px; 
-  z-index: 10; */
   width: 100%;
   backdrop-filter: blur(8px);
   box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.05);
   align-items: flex-end;
   border: 0px;
+
+  flex-shrink: 0;
 }
+
 
 .chat-input::placeholder {
   color: var(--placeholder-color);
@@ -196,18 +187,27 @@ button:hover .icon{
 }
 
 .messages-container {
+  flex: 1;
+  overflow-y: auto;
   display: flex;
   flex-direction: column;
-  overflow-y: auto;
-  flex: 1;
   padding: 12px 4px;
   gap: 10px;
   scrollbar-width: none;
 }
 
+
 .time{
   align-self: flex-end;
 }
+
+html, body {
+  height: 100dvh;
+  margin: 0;
+  padding: 0;
+  overscroll-behavior: contain;
+}
+
 
 
 .dot-anim {
