@@ -102,7 +102,7 @@ button:hover .icon{
   /* position: sticky; */
   /* bottom: 0px; */
   /* z-index: 10; */
-  width: 100vw;
+  width: 100%;
   backdrop-filter: blur(8px);
   box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.05);
   align-items: flex-end;
