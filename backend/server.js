@@ -175,7 +175,6 @@ io.on('connection', socket => {
 
         onlineUsers.set(username, socket.id);
 
-
         allUsers.length = 0;
 
         for (const user of users) {

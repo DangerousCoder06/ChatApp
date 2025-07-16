@@ -78,23 +78,22 @@ const Home = () => {
     }
   }, [messages.length]);
 
-
   useEffect(() => {
     if (localStorage.getItem("message")) {
       const chat = JSON.parse(localStorage.getItem("message"))
       setMessages(chat)
     }
-
+    
     socket.current = createSocket()
     socket.current.emit("user-connected", { username, from: "chat", token: localStorage.getItem("token") })
-
+    
     socket.current.on("show-typing", (username) => {
       setIsTyping(username);
       setTimeout(() => setIsTyping(null), 1500)
     })
-
+    
     socket.current.on('connect', () => {
-
+      
       setMessages(prevMessages => {
         const updatedMessages = prevMessages.map(msg => {
           if (msg.status === "pending" && msg.sender === username) {
@@ -149,7 +148,7 @@ const Home = () => {
       setOnlineUsers(onlineUsers)
       setHasRendered(true)
     })
-
+    
 
     socket.current.on('joined', (message) => {
       setMessages(messages => [...messages, message])

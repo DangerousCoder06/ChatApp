@@ -90,7 +90,7 @@ const InnerCallUI = ({ onEnd, caller, username, socket, callee }) => {
     const audioRef = useRef()
 
     useEffect(() => {
-        socket.emit("user-connected", { username, from: "video" })
+        socket.emit("user-connected", { username, from: "video", token: localStorage.getItem("token") })
 
         socket.on("timeOut-response", () => {
             window.close()
