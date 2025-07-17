@@ -24,6 +24,7 @@ const io = new Server(server, {
 const port = 3000
 
 const onlineUsers = new Map();
+const videoUsers = new Map()
 const allUsers = [];
 
 
@@ -58,13 +59,19 @@ io.on('connection', socket => {
         socket.broadcast.emit("timeOut-response")
     })
 
-    socket.on("incoming-accepted", () => {
-        io.emit("clear-timeout")
-    })
+    socket.on("call-ended", ({ to }) => {
+        const targetSocket = onlineUsers.get(to);
+        if (targetSocket) {
+            io.to(targetSocket).emit("incoming-null");
+        }
+    });
 
-    socket.on("caller-hangUp", () => {
-        socket.broadcast.emit("incoming-null")
-    })
+    socket.on("caller-hangup", ({ to }) => {
+        const targetSocket = videoUsers.get(to);
+        if (targetSocket) {
+            io.to(targetSocket).emit("caller-hangup-alert");
+        }
+    });
 
     socket.on("toggle-mute", async ({ targetUsername, by }) => {
         try {
@@ -173,7 +180,13 @@ io.on('connection', socket => {
             return
         }
 
-        onlineUsers.set(username, socket.id);
+        if (from === "chat") {
+            onlineUsers.set(username, socket.id);
+        }
+
+        if (from === "video") {
+            videoUsers.set(username, socket.id);
+        }
 
         allUsers.length = 0;
 
@@ -183,6 +196,7 @@ io.on('connection', socket => {
 
         io.emit("user-list", {
             onlineUsers: Array.from(onlineUsers.keys()),
+            videoUsers: Array.from(videoUsers.keys()),
             allUsers
         })
 
@@ -211,8 +225,17 @@ io.on('connection', socket => {
                 }
             }
 
+            if (from === "video") {
+                for (const [username, id] of videoUsers) {
+                    if (id === socket.id) {
+                        videoUsers.delete(username)
+                    }
+                }
+            }
+
             io.emit("user-list", {
                 onlineUsers: Array.from(onlineUsers.keys()),
+                videoUsers: Array.from(videoUsers.keys()),
                 allUsers
             })
 
@@ -233,8 +256,6 @@ io.on('connection', socket => {
             }
         })
     })
-
-
 });
 
 const JWT_SECRET = process.env.JWT_SECRET
@@ -267,7 +288,6 @@ app.post('/register', async (req, res) => {
         res.status(200).send({ token })
 
     } catch (e) {
-        console.log(e);
         res.status(400).json({ error: "Username already exists" })
     }
 

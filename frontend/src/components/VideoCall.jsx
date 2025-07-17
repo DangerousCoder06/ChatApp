@@ -12,7 +12,7 @@ import { useRef, useState, useEffect } from "react";
 import { createSocket } from "../utils/socket";
 import '@stream-io/video-react-sdk/dist/css/styles.css';
 
-const CustomCallControls = ({ socket }) => {
+const CustomCallControls = ({ socket, callee }) => {
 
     const call = useCall();
     const [isMute, setIsMute] = useState(false);
@@ -32,7 +32,8 @@ const CustomCallControls = ({ socket }) => {
 
     const leaveCall = async () => {
         await call.leave();
-        socket.emit("caller-hangUp")
+        socket.emit("call-ended", { to: callee });
+        socket.emit("caller-hangup", { to: callee });
         window.close();
     };
 
@@ -41,11 +42,9 @@ const CustomCallControls = ({ socket }) => {
             <button onClick={toggleMic} className={`w-12 h-12 rounded-full flex items-center justify-center shadow-md transition ${isMute ? "bg-white" : "bg-gray-800"}`}>
                 {isMute ? <FaMicrophoneSlash className="text-black text-xl" /> : <FaMicrophone className="text-white text-xl" />}
             </button>
-
             <button onClick={toggleCamera} className={`w-12 h-12 rounded-full flex items-center justify-center shadow-md transition ${videoOn ? "bg-gray-800" : "bg-white"}`}>
                 {videoOn ? <FaVideo className="text-white text-xl" /> : <FaVideoSlash className="text-black text-xl" />}
             </button>
-
             <button onClick={leaveCall} className="w-12 h-12 rounded-full flex items-center justify-center bg-red-600 hover:bg-red-700 transition shadow-md">
                 <ImPhoneHangUp className="text-white text-xl" />
             </button>
@@ -71,24 +70,36 @@ const MyFullscreenRemoteParticipant = ({ participant }) => {
     );
 };
 
-export default function VideoCall({ call, onEnd, caller, username, callee }) {
+export default function VideoCall({ call, caller, username, callee }) {
     const socket = useRef()
-    socket.current = createSocket()
+    if (!socket.current){
+        socket.current = createSocket()
+    }
 
     return (
         <StreamTheme>
             <StreamCall call={call}>
-                <InnerCallUI onEnd={onEnd} caller={caller} username={username} socket={socket.current} callee={callee} />
+                <InnerCallUI caller={caller} username={username} socket={socket.current} callee={callee} />
             </StreamCall>
         </StreamTheme>
     );
 }
 
-const InnerCallUI = ({ onEnd, caller, username, socket, callee }) => {
+const InnerCallUI = ({ caller, username, socket, callee }) => {
 
     const [onlineUsers, setOnlineUsers] = useState([])
+    const [showControls, setShowControls] = useState(null)
     const audioRef = useRef()
 
+    const { useLocalParticipant, useRemoteParticipants } = useCallStateHooks();
+    const localParticipant = useLocalParticipant();
+    const remoteParticipants = useRemoteParticipants();
+    const isRinging = remoteParticipants.length === 0 ? true : false
+
+    const handleUnload = () => {
+        socket.emit("call-ended", { to: callee });
+    };
+    
     useEffect(() => {
         socket.emit("user-connected", { username, from: "video", token: localStorage.getItem("token") })
 
@@ -107,23 +118,36 @@ const InnerCallUI = ({ onEnd, caller, username, socket, callee }) => {
             window.close()
         })
 
-        if (isRinging && audioRef.current){
+        socket.on("call-rejected-alert", (username) => {
+            alert(`${username} rejected the call`)
+            window.close()
+        })
+
+        socket.on("caller-hangup-alert", () => {
+            alert(`${caller} disconnected`);
+            window.close()
+        })
+
+        if (isRinging && audioRef.current) {
             audioRef.current.play()
         }
+
+        window.addEventListener("beforeunload", handleUnload);
 
         return () => {
             socket.off("timeOut-response")
             socket.off("user-list")
             socket.off("disconnect-alert")
-        }
+            socket.off("call-rejected-alert")
+            socket.off("incoming-null")
+            socket.off("caller-hangup-alert")
 
-    }, [])
+            window.removeEventListener("beforeunload", handleUnload);
+            socket.emit("call-ended", { to: callee });
+        };
 
-    const { useLocalParticipant, useRemoteParticipants } = useCallStateHooks();
-    const localParticipant = useLocalParticipant();
-    const remoteParticipants = useRemoteParticipants();
+    }, [socket])
 
-    const isRinging = remoteParticipants.length === 0 ? true : false
 
     return (
         <div className="w-full h-screen relative bg-black overflow-hidden">
@@ -136,9 +160,9 @@ const InnerCallUI = ({ onEnd, caller, username, socket, callee }) => {
                 </div>
             }
             <MyFullscreenRemoteParticipant participant={remoteParticipants[0]} />
-            {isRinging ? <MyFullscreenRemoteParticipant participant={localParticipant} /> : <MyFloatingLocalParticipant className="rounded-lg" participant={localParticipant} />}
+            {isRinging ? <MyFullscreenRemoteParticipant participant={localParticipant} /> : <MyFloatingLocalParticipant participant={localParticipant} />}
 
-            <CustomCallControls socket={socket} />
+            <CustomCallControls socket={socket} callee={callee} />
         </div>
     );
 };

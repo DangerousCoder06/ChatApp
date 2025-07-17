@@ -12,7 +12,10 @@ import { MdDarkMode } from "react-icons/md";
 import { IoVideocamSharp } from "react-icons/io5";
 import { IoLogOutOutline } from "react-icons/io5";
 import IncomingCallModal from "../components/IncomingCallModal";
-import {createSocket} from "../utils/socket";
+import { createSocket } from "../utils/socket";
+import { MdLightMode } from "react-icons/md";
+import { TbReload } from "react-icons/tb";
+import { AiFillDelete } from "react-icons/ai";
 
 
 const Home = () => {
@@ -66,6 +69,7 @@ const Home = () => {
   const containerRef = useRef();
 
   const settimeoutRef = useRef(null)
+  const audioRef = useRef()
 
 
   useEffect(() => {
@@ -83,17 +87,17 @@ const Home = () => {
       const chat = JSON.parse(localStorage.getItem("message"))
       setMessages(chat)
     }
-    
+
     socket.current = createSocket()
     socket.current.emit("user-connected", { username, from: "chat", token: localStorage.getItem("token") })
-    
+
     socket.current.on("show-typing", (username) => {
       setIsTyping(username);
       setTimeout(() => setIsTyping(null), 1500)
     })
-    
+
     socket.current.on('connect', () => {
-      
+
       setMessages(prevMessages => {
         const updatedMessages = prevMessages.map(msg => {
           if (msg.status === "pending" && msg.sender === username) {
@@ -148,7 +152,7 @@ const Home = () => {
       setOnlineUsers(onlineUsers)
       setHasRendered(true)
     })
-    
+
 
     socket.current.on('joined', (message) => {
       setMessages(messages => [...messages, message])
@@ -192,18 +196,15 @@ const Home = () => {
 
     })
 
-    socket.current.on("clear-timeout", () => {
+    socket.current.on("incoming-null", () => {
+      if (audioRef.current){
+        audioRef.current.pause()
+      }
+      setIncomingCall(null)
       clearTimeout(settimeoutRef.current)
     })
 
-    socket.current.on("call-rejected-alert", (username) => {
-      alert(`${username} rejected the call`)
-    })
-
-    socket.current.on("incoming-null", () => {
-      setIncomingCall(null)
-    })
-
+    
     return () => {
       socket.current.off("incoming-call")
       socket.current.off("message")
@@ -215,14 +216,15 @@ const Home = () => {
       socket.current.off("show-typing")
       socket.current.off("mute-status-updated")
       socket.current.off("incoming-null")
-      socket.current.off("clear-timeout")
-      socket.current.disconnect()
     }
 
   }, [])
 
   const [muted, setMuted] = useState(null)
-
+  
+  if (incomingCall && audioRef.current){
+    audioRef.current.play()
+  }
   useEffect(() => {
     if (localStorage.getItem("isMuted") === "true") {
       setMuted(true)
@@ -252,7 +254,7 @@ const Home = () => {
   const [value, setValue] = useState("")
 
   const handleChange = (e) => {
-    setValue(e.target.value)
+    setValue(e.target.value.trim())
     socket.current.emit("typing", username)
     textarea.style.height = "auto"
     textarea.style.height = `${textarea.scrollHeight}px`
@@ -269,7 +271,7 @@ const Home = () => {
       status: "sent"
     }
 
-    if (value != "") {
+    if (value.trim() != "") {
       if (socket.current.connected) {
         socket.current.emit("user-message", sendMessage)
         setMessages(messages => [...messages, sendMessage])
@@ -383,16 +385,16 @@ const Home = () => {
     socket.current.emit("toggle-ban", { targetUsername: targetUser.username, by: username })
   }
 
+  const [theme, setTheme] = useState(localStorage.getItem("theme"))
+
   const toggleDark = () => {
     document.body.classList.toggle("dark-mode")
-    localStorage.setItem(
-      "theme",
-      document.body.classList.contains("dark-mode") ? "dark" : "light"
-    )
+    localStorage.setItem("theme", document.body.classList.contains("dark-mode") ? "light" : "dark")
+    setTheme(`${localStorage.getItem("theme")} mode`)
   }
 
   useEffect(() => {
-    if (localStorage.getItem("theme") === "dark") {
+    if (localStorage.getItem("theme") === "light") {
       document.body.classList.add("dark-mode")
     }
   }, [])
@@ -416,18 +418,26 @@ const Home = () => {
       {incomingCall && (
         <IncomingCallModal
           caller={incomingCall.caller}
-          onAccept={async () => {
+          onAccept={() => {
+            if (audioRef.current){
+              audioRef.current.pause()
+            }
             const popup = window.open(
               `/video-call?callId=${incomingCall.callId}&caller=${incomingCall.caller}&callee=${username}`,
               "_blank",
               "width=700,height=500"
             );
 
+            clearTimeout(settimeoutRef.current)
             setIncomingCall(null)
-            socket.current.emit("incoming-accepted")
+
           }}
           onReject={() => {
+            if (audioRef.current){
+              audioRef.current.pause()
+            }
             setIncomingCall(null)
+            clearTimeout(settimeoutRef.current)
             socket.current.emit("call-rejected", username)
           }}
         />
@@ -436,18 +446,19 @@ const Home = () => {
 
       <div className={`sideBar fixed h-full top-0 left-0 w-[300px] bg-white shadow-xl z-50 transform transition-transform duration-250 ease-in-out ${isOpen ? 'translate-x-0' : '-translate-x-full'} rounded-r-sm overflow-y-auto`}>
 
-        <button onClick={() => setisOpen(false)} className="p-3 m-3 rounded-full hover:bg-gray-200 transition">
+        <button onClick={() => setisOpen(false)} className="p-3 m-3 rounded-full hover:bg-gray-200 transition" title="Back">
           <IoArrowBackOutline className="icon" size={20} />
         </button>
 
         <div className="px-4 relative">
 
-          <div className="flex justify-between items-center font-semibold mb-4 border-b pb-2 text-gray-700 sideHeader"><h1 className="text-3xl">Users</h1>
-            <button className="text-sm" onClick={() => localStorage.removeItem("token")}><IoLogOutOutline className="icon" size={20} /></button>
+          <div className="flex justify-between items-end font-semibold mb-6 border-b pb-2 text-gray-700 sideHeader">
+            <h1 className="text-3xl">Users</h1>
+            <button onClick={() => localStorage.removeItem("token")} title="Logout"><IoLogOutOutline className="icon" size={20} /></button>
           </div>
 
 
-          <input onChange={handleSearch} value={searchValue} className="searchBar mb-[10px]" type="text" placeholder="🔍 Search users..." />
+          <input onChange={handleSearch} value={searchValue} className="searchBar mb-[15px]" type="text" placeholder="🔍 Search users..." />
           <span className="flex items-center">
             <span className="animate-pulse w-4 h-4 rounded-full ml-[6px] bg-green-500"></span>
             <span>
@@ -508,15 +519,15 @@ const Home = () => {
                           </span>
                         </div>
                         <div className="admin flex gap-[15px] ml-auto pr-2">
-                          <button onClick={() => handleVideoCall(user)}>
+                          <button onClick={() => handleVideoCall(user)} title="VideoCall">
                             <IoVideocamSharp className="icon" />
                           </button>
                           {isAdmin.current &&
                             <div className="flex items-center gap-[15px]">
-                              <button onClick={() => handleMute(user)}>
+                              <button onClick={() => handleMute(user)} title="Mute">
                                 <PiChatSlashFill className="icon" color={user.isMuted ? "red" : ""} />
                               </button>
-                              <button onClick={() => handleBan(user)}>
+                              <button onClick={() => handleBan(user)} title="Ban">
                                 <FaBan className="icon" color={user.isBanned ? "red" : ""} />
                               </button>
                             </div>
@@ -617,7 +628,7 @@ const Home = () => {
         </div>
 
         <nav className="navbar flex justify-between items-center sticky top-0">
-          <button onClick={() => setisOpen(true)} className="hamBurger cursor-pointer p-3 rounded-full hover:bg-gray-200"><RxHamburgerMenu className="icon" /></button>
+          <button title="Users" onClick={() => setisOpen(true)} className="hamBurger cursor-pointer p-3 rounded-full hover:bg-gray-200"><RxHamburgerMenu className="icon" strokeWidth={0.5} /></button>
           <div>
             {socket.current && socket.current.connected ?
               <span className="flex justify-center items-center px-3 text-green-800 text-[16px] font-semibold">
@@ -642,13 +653,19 @@ const Home = () => {
             }
           </div>
           <div>
-            <button className="p-3 rounded-full hover:bg-gray-300 transition-all duration-200" onClick={toggleDark}>
-              <MdDarkMode className="icon" />
+            <button className="p-3 rounded-full hover:bg-gray-300 transition-all duration-200" title="clear chat" onClick={() => {localStorage.removeItem("message")}}>
+              <AiFillDelete className="icon" />
+            </button>
+            <button className="p-3 rounded-full hover:bg-gray-300 transition-all duration-200" title={theme} onClick={toggleDark}>
+              {document.body.classList.contains("dark-mode") ? <MdLightMode className="icon" size={17} /> : <MdDarkMode className="icon" />}
+            </button>
+            <button className="p-3 rounded-full hover:bg-gray-300 transition-all duration-200" title="reload page" onClick={() => {window.location.reload()}}>
+              <TbReload className="icon" strokeWidth={2.5} />
             </button>
           </div>
         </nav>
       </div>
-
+      <audio src="/ringtone.mp3" ref={audioRef}></audio>
     </div>
 
   )
