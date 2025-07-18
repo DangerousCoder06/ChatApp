@@ -446,7 +446,7 @@ const Home = () => {
 
       <div className={`sideBar fixed h-full top-0 left-0 w-[300px] bg-white shadow-xl z-50 transform transition-transform duration-250 ease-in-out ${isOpen ? 'translate-x-0' : '-translate-x-full'} rounded-r-sm overflow-y-auto`}>
 
-        <button onClick={() => setisOpen(false)} className="p-3 m-3 rounded-full hover:bg-gray-200 transition" title="Back">
+        <button onClick={() => setisOpen(false)} className="p-2 m-3 rounded-full hover:bg-gray-100 transition" title="Back">
           <IoArrowBackOutline className="icon" size={20} />
         </button>
 
@@ -628,38 +628,38 @@ const Home = () => {
         </div>
 
         <nav className="navbar flex justify-between items-center sticky top-0">
-          <button title="Users" onClick={() => setisOpen(true)} className="hamBurger cursor-pointer p-3 rounded-full hover:bg-gray-200"><RxHamburgerMenu className="icon" strokeWidth={0.5} /></button>
+          <button title="Users" onClick={() => setisOpen(true)} className="hamBurger cursor-pointer p-3 rounded-full hover:bg-gray-100"><RxHamburgerMenu className="icon" strokeWidth={0.5} /></button>
           <div>
             {socket.current && socket.current.connected ?
-              <span className="flex justify-center items-center px-3 text-white text-[16px] font-semibold">
+              <span className="flex justify-center items-center px-3 text-[16px] font-semibold relative left-[25px]">
                 <span className="flex items-center">
 
                   <span className="text-base animate-pulse w-4 h-4 rounded-full bg-green-500"></span>
-                  <span>
+                  <span className={document.body.classList.contains("dark-mode") ? "text-white" : "text-black"}>
                     Online
                   </span>
                 </span>
               </span> : (
-                <>
-                  <span className="flex justify-center items-center px-3 text-white text-[16px] font-semibold">
+                <div className="relative left-[25px]">
+                  <span className="flex justify-center items-center px-3 text-[16px] font-semibold">
                     <span className="text-base animate-pulse w-4 h-4 rounded-full bg-red-500"></span>
-                    <span>
+                    <span className={document.body.classList.contains("dark-mode") ? "text-white" : "text-black"}>
                       Offline
                     </span>
                   </span>
                   <div className="text-xs text-red-600 mt-1 ml-2">Please check your connection</div>
-                </>
+                </div>
               )
             }
           </div>
           <div>
-            <button className="p-2 rounded-full hover:bg-gray-300 transition-all duration-200" title="clear chat" onClick={() => {localStorage.removeItem("message");window.location.reload()}}>
+            <button className="p-2 rounded-full hover:bg-gray-100 transition-all duration-200" title="clear chat" onClick={() => {localStorage.removeItem("message");window.location.reload()}}>
               <AiFillDelete className="icon" />
             </button>
-            <button className="p-2 rounded-full hover:bg-gray-300 transition-all duration-200" title={theme} onClick={toggleDark}>
+            <button className="p-2 rounded-full hover:bg-gray-100 transition-all duration-200" title={theme} onClick={toggleDark}>
               {document.body.classList.contains("dark-mode") ? <MdLightMode className="icon" size={17} /> : <MdDarkMode className="icon" />}
             </button>
-            <button className="p-2 rounded-full hover:bg-gray-300 transition-all duration-200" title="refresh" onClick={() => {window.location.reload()}}>
+            <button className="p-2 rounded-full hover:bg-gray-100 transition-all duration-200" title="refresh" onClick={() => {window.location.reload()}}>
               <TbReload className="icon" strokeWidth={2.5} />
             </button>
           </div>
