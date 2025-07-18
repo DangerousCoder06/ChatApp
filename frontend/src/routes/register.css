@@ -1,12 +1,7 @@
 .register {
   background: url("https://ik.imagekit.io/ably/ghost/prod/2021/11/fully-scalable-chat-app-pt1-1.png?tr=w-1728,q-50");
-  background-size: cover;
-  min-height: 100vh;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+  background-position: center center;
   position: relative;
-  z-index: 1;
   overflow-y: hidden;
 }
 
@@ -14,10 +9,10 @@
   content: "";
   position: absolute;
   inset: 0;
-  background: inherit;
+  background: url("https://ik.imagekit.io/ably/ghost/prod/2021/11/fully-scalable-chat-app-pt1-1.png?tr=w-1728,q-50");
   background-size: cover;
   background-position: center;
-  filter: blur(6px) brightness(0.6);
+  filter: blur(6px);
   z-index: -1;
 }
 
@@ -29,7 +24,6 @@
   border-radius: 20px;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
   text-align: center;
-  width: 100%;
   max-width: 350px;
   color: #fff;
   position: relative;
@@ -49,17 +43,6 @@ input {
   margin-bottom: 4px;
 }
 
-input:focus {
-  border-color: #2563eb;
-  background-color: #fff;
-  outline: none;
-}
-
-input.password {
-  width: 280px;
-  padding-right: 40px;
-}
-
 button.password {
   position: absolute;
   right: 14px;
@@ -71,12 +54,6 @@ button.password {
   color: #555;
 }
 
-.text-red-600 {
-  font-size: 13px;
-  margin-top: 3px;
-  color: #ef4444;
-  text-align: left;
-}
 
 button.submit {
   width: 280px;
@@ -119,13 +96,12 @@ a {
 
 @media (max-width: 640px) {
   input, .submit{
-    width: 250px;
-
+    width: 250px !important;
   }
 }
 @media (max-width: 350px) {
   input, .submit{
-    width: 150px;
+    width: 150px !important;
 
   }
   .header{
