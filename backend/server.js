@@ -176,8 +176,10 @@ io.on('connection', socket => {
         const users = await User.find({})
 
         const user = await User.findOne({ username })
-        if (user.isBanned || !token) {
-            return
+        if (user){
+            if (user.isBanned || !token) {
+                return
+            }
         }
 
         if (from === "chat") {
