@@ -54,9 +54,9 @@ const Register = () => {
     
     
     if (res.status === 200) {
-      const { token } = await res.json();
-      localStorage.setItem("token", token);
-      navigate("/home");
+      // const { token } = await res.json();
+      // localStorage.setItem("token", token);
+      navigate("/login");
       localStorage.setItem("username", username);
       reset()
     } else {

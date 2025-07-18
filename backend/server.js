@@ -281,11 +281,11 @@ app.post("/token", (req, res) => {
 app.post('/register', async (req, res) => {
     try {
         const user = await User.create(req.body)
-        const token = jwt.sign({ id: user._id, username: user.username },
-            JWT_SECRET,
-            { expiresIn: "2d" }
-        );
-        res.status(200).send({ token })
+        // const token = jwt.sign({ id: user._id, username: user.username },
+        //     JWT_SECRET,
+        //     { expiresIn: "2d" }
+        // );
+        res.status(200).send("Registered successfully")
 
     } catch (e) {
         res.status(400).json({ error: "Username already exists" })

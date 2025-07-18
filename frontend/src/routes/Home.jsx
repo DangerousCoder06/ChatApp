@@ -631,20 +631,20 @@ const Home = () => {
           <button title="Users" onClick={() => setisOpen(true)} className="hamBurger cursor-pointer p-3 rounded-full hover:bg-gray-200"><RxHamburgerMenu className="icon" strokeWidth={0.5} /></button>
           <div>
             {socket.current && socket.current.connected ?
-              <span className="flex justify-center items-center px-3 text-green-800 text-[16px] font-semibold">
+              <span className="flex justify-center items-center px-3 text-white text-[16px] font-semibold">
                 <span className="flex items-center">
 
                   <span className="text-base animate-pulse w-4 h-4 rounded-full bg-green-500"></span>
                   <span>
-                    <pre> Online</pre>
+                    Online
                   </span>
                 </span>
               </span> : (
                 <>
-                  <span className="flex justify-center items-center px-3 text-green-800 text-[16px] font-semibold">
+                  <span className="flex justify-center items-center px-3 text-white text-[16px] font-semibold">
                     <span className="text-base animate-pulse w-4 h-4 rounded-full bg-red-500"></span>
                     <span>
-                      <pre> Offline</pre>
+                      Offline
                     </span>
                   </span>
                   <div className="text-xs text-red-600 mt-1 ml-2">Please check your connection</div>
@@ -653,13 +653,13 @@ const Home = () => {
             }
           </div>
           <div>
-            <button className="p-3 rounded-full hover:bg-gray-300 transition-all duration-200" title="clear chat" onClick={() => {localStorage.removeItem("message")}}>
+            <button className="p-2 rounded-full hover:bg-gray-300 transition-all duration-200" title="clear chat" onClick={() => {localStorage.removeItem("message");window.location.reload()}}>
               <AiFillDelete className="icon" />
             </button>
-            <button className="p-3 rounded-full hover:bg-gray-300 transition-all duration-200" title={theme} onClick={toggleDark}>
+            <button className="p-2 rounded-full hover:bg-gray-300 transition-all duration-200" title={theme} onClick={toggleDark}>
               {document.body.classList.contains("dark-mode") ? <MdLightMode className="icon" size={17} /> : <MdDarkMode className="icon" />}
             </button>
-            <button className="p-3 rounded-full hover:bg-gray-300 transition-all duration-200" title="reload page" onClick={() => {window.location.reload()}}>
+            <button className="p-2 rounded-full hover:bg-gray-300 transition-all duration-200" title="refresh" onClick={() => {window.location.reload()}}>
               <TbReload className="icon" strokeWidth={2.5} />
             </button>
           </div>
