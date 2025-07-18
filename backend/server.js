@@ -182,6 +182,8 @@ io.on('connection', socket => {
             }
         }
 
+        socket.emit("mute-status", {isMuted: user.isMuted})
+
         if (from === "chat") {
             onlineUsers.set(username, socket.id);
         }
@@ -257,6 +259,8 @@ io.on('connection', socket => {
                 socket.broadcast.emit('left', leftMessage)
             }
         })
+
+        socket.emit("content-loaded")
     })
 });
 
@@ -308,7 +312,10 @@ app.post('/login', async (req, res) => {
     if (!isMatch) {
         return res.status(401).send({ error: "❌Invalid Credentials" })
     }
-
+    if (user.isBanned){
+        return res.status(403).send("User is banned")
+    }
+    
     const token = jwt.sign({ id: user._id, username },
         JWT_SECRET,
         { expiresIn: "2d" }
@@ -321,6 +328,11 @@ app.get('/verify', Auth, async (req, res) => {
     const user = await User.findOne({ username: req.user.username })
     if (!user) {
         res.status(401).send("User not found")
+        return
+    }
+
+    if (user.isBanned){
+        res.status(403).send("User is banned")
         return
     }
 

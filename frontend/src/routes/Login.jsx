@@ -71,8 +71,11 @@ const Login = () => {
         alert(e.error);
         return;
       }
-
-
+      
+      if (res.status === 403) {
+        alert("You are banned")
+        return;
+      }
       const { token } = await res.json();
       localStorage.setItem("token", token);
       localStorage.setItem("username", username);
@@ -94,11 +97,11 @@ const Login = () => {
   return (
     <div className="container login min-w-screen h-screen flex justify-center items-center">
       <div className="form bg-white max-w-[350px] min-h-[400px] rounded-[20px] shadow-2xl p-6 flex flex-col items-center">
-        <div className='header mx-1 w-[200px] sm:w-full'>
+        <div className='header mx-1 w-[250px] sm:w-[280px]'>
           <h1 className='text-3xl font-bold my-1'>Sign In</h1>
           <h4>ConnectHub - Real-Time Video Calling & Chat App</h4>
         </div>
-        <form className=' flex flex-col items-center gap-[20px] my-8' action="" onSubmit={handleSubmit(onSubmit)}>
+        <form className=' flex flex-col items-center gap-[20px] my-6' action="" onSubmit={handleSubmit(onSubmit)}>
           <div>
             <input className='input' type="text" {...register("username", { required: { value: true, message: "* This field is required" } })} placeholder='Enter username' />
             {errors.username && <div className='text-red-600 text-sm'>{errors.username.message}</div>}
@@ -112,7 +115,7 @@ const Login = () => {
             {errors.password && <div className='text-red-600 relative left-[8px] text-sm'>{errors.password.message}</div>}
           </div>
 
-          <button className='submit my-5 bg-blue-600 text-white font-bold text-xl w-[290px] rounded-4xl h-[50px]' type='submit' disabled={isSubmitting}>Sign In</button>
+          <button className='submit my-5 bg-blue-600 text-white font-bold text-xl w-[290px] rounded-4xl h-[55px]' type='submit' disabled={isSubmitting}>Sign In</button>
           {isSubmitting && <div>Verifying...</div>}
 
         </form>
