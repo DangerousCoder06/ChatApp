@@ -1,5 +1,8 @@
 @import "tailwindcss";
 
+*{
+    scrollbar-width: none;
+}
 button {
     cursor: pointer;
 }
