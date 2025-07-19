@@ -2,7 +2,7 @@
   background: url("https://ik.imagekit.io/ably/ghost/prod/2021/11/fully-scalable-chat-app-pt1-1.png?tr=w-1728,q-50");
   background-position: center center;
   position: relative;
-  overflow-y: hidden;
+  overflow-y: auto;
 }
 
 .register::before {
@@ -45,14 +45,13 @@ input {
 
 button.password {
   position: absolute;
-  right: 14px;
-  top: 50%;
-  transform: translateY(-50%) scale(1.2);
-  background: none;
-  border: none;
+  right: 10px;
+  top: 18px;
   cursor: pointer;
   color: #555;
+  transform: scale(0.99);
 }
+
 
 
 button.submit {

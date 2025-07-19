@@ -102,17 +102,17 @@ const Login = () => {
           <h4>ConnectHub - Real-Time Video Calling & Chat App</h4>
         </div>
         <form className=' flex flex-col items-center gap-[20px] my-6' action="" onSubmit={handleSubmit(onSubmit)}>
-          <div>
+          <div className='flex flex-col items-start'>
             <input className='input' type="text" {...register("username", { required: { value: true, message: "* This field is required" } })} placeholder='Enter username' />
             {errors.username && <div className='text-red-600 text-sm'>{errors.username.message}</div>}
 
           </div>
-          <div className='relative'>
+          <div className='relative flex flex-col items-start'>
             <input className='password input' {...register("password", {
               required: { value: true, message: "* This field is required" }
             })} type={showPassword ? "text" : "password"} placeholder="Password" />
-            <button type="button" className='password cursor-pointer' onClick={handlePassClick}>{showPassword ? <IoIosEye /> : <FaEyeSlash />}</button>
-            {errors.password && <div className='text-red-600 relative left-[8px] text-sm'>{errors.password.message}</div>}
+            <button type="button" className='password' onClick={handlePassClick}>{showPassword ? <IoIosEye /> : <FaEyeSlash />}</button>
+            {errors.password && <div className='text-red-600 relative text-sm'>{errors.password.message}</div>}
           </div>
 
           <button className='submit my-5 bg-blue-600 text-white font-bold text-xl w-[290px] rounded-4xl h-[55px]' type='submit' disabled={isSubmitting}>Sign In</button>
