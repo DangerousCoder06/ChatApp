@@ -291,7 +291,7 @@ app.post('/register', async (req, res) => {
             JWT_SECRET,
             { expiresIn: "2d" }
         );
-        res.status(200).send("Registered successfully")
+        res.status(200).json({token})
 
     } catch (e) {
         res.status(400).json({ error: "Username already exists" })

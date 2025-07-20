@@ -447,7 +447,7 @@ const Home = () => {
 
             <div className="px-4 relative">
 
-              <div className="flex justify-between items-end font-semibold mb-6 border-b pb-2 text-gray-700 sideHeader">
+              <div className="flex justify-between items-center font-semibold mb-6 border-b pb-2 text-gray-700 sideHeader">
                 <h1 className="text-3xl">Users</h1>
                 <button onClick={() => { localStorage.removeItem("token"); socket.current.disconnect() }} title="Logout">
                   <IoLogOutOutline className="icon" size={20} />
@@ -455,14 +455,14 @@ const Home = () => {
               </div>
 
 
-              <input onChange={handleSearch} value={searchValue} className="searchBar mb-[15px]" type="text" placeholder="🔍 Search users..." />
+              <input onChange={handleSearch} value={searchValue} className="searchBar mb-[15px] bg-white text-gray-800 px-1" type="text" placeholder="🔍 Search users..." />
               <span className="flex items-center">
                 <span className="animate-pulse w-4 h-4 rounded-full ml-[6px] bg-green-500"></span>
                 <span>
                   <pre> Online{`(${[... new Set(onlineUsers)].length})`}</pre>
                 </span>
               </span>
-              <div className="overflow-y-auto pr-1 mt-5 flex-1">
+              <div className="overflow-y-auto pr-1 mt-2 flex-1">
                 {hasRendered &&
                   <ul className="space-y-3 flex-1 flex-col">
                     <div>

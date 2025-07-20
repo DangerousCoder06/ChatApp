@@ -29,7 +29,7 @@
   z-index: 2;
 }
 
-input {
+input.verify {
   height: 50px;
   border-radius: 10px;
   border: 2px solid #ccc;
@@ -71,7 +71,6 @@ button.submit:hover {
 h1 {
   font-size: 28px;
   margin-bottom: 5px;
-  color: #fff;
 }
 
 h4 {

@@ -103,12 +103,12 @@ const Login = () => {
         </div>
         <form className=' flex flex-col items-center gap-[20px] my-6' action="" onSubmit={handleSubmit(onSubmit)}>
           <div className='flex flex-col items-start'>
-            <input className='input' type="text" {...register("username", { required: { value: true, message: "* This field is required" } })} placeholder='Enter username' />
+            <input className='input verify' type="text" {...register("username", { required: { value: true, message: "* This field is required" } })} placeholder='Enter username' />
             {errors.username && <div className='text-red-600 text-sm'>{errors.username.message}</div>}
 
           </div>
           <div className='relative flex flex-col items-start'>
-            <input className='password input' {...register("password", {
+            <input className='password input verify' {...register("password", {
               required: { value: true, message: "* This field is required" }
             })} type={showPassword ? "text" : "password"} placeholder="Password" />
             <button type="button" className='password' onClick={handlePassClick}>{showPassword ? <IoIosEye /> : <FaEyeSlash />}</button>
