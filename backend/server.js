@@ -176,65 +176,25 @@ io.on('connection', socket => {
         const users = await User.find({})
 
         const user = await User.findOne({ username })
-        if (user){
+        if (user) {
             if (user.isBanned || !token) {
                 return
             }
-        }
 
-        socket.emit("mute-status", {isMuted: user.isMuted})
+            socket.emit("mute-status", { isMuted: user.isMuted })
 
-        if (from === "chat") {
-            onlineUsers.set(username, socket.id);
-        }
-
-        if (from === "video") {
-            videoUsers.set(username, socket.id);
-        }
-
-        allUsers.length = 0;
-
-        for (const user of users) {
-            allUsers.push(user);
-        }
-
-        io.emit("user-list", {
-            onlineUsers: Array.from(onlineUsers.keys()),
-            videoUsers: Array.from(videoUsers.keys()),
-            allUsers
-        })
-
-        socket.broadcast.emit("user-online", username);
-
-        const joinMessage = {
-            id: uuidv4(),
-            message: `${username} joined the chat`,
-            type: "join",
-            date: new Date(Date.now()).toLocaleDateString('en-IN', {
-                month: 'short', year: 'numeric',
-                weekday: 'short', day: '2-digit',
-            }),
-            sender: username
-        }
-        if (from === "chat") {
-            io.emit('joined', joinMessage)
-        }
-
-        socket.on("disconnect", () => {
             if (from === "chat") {
-                for (const [username, id] of onlineUsers) {
-                    if (id === socket.id) {
-                        onlineUsers.delete(username)
-                    }
-                }
+                onlineUsers.set(username, socket.id);
             }
 
             if (from === "video") {
-                for (const [username, id] of videoUsers) {
-                    if (id === socket.id) {
-                        videoUsers.delete(username)
-                    }
-                }
+                videoUsers.set(username, socket.id);
+            }
+
+            allUsers.length = 0;
+
+            for (const user of users) {
+                allUsers.push(user);
             }
 
             io.emit("user-list", {
@@ -243,24 +203,64 @@ io.on('connection', socket => {
                 allUsers
             })
 
-            if (from === "video") {
-                socket.broadcast.emit("disconnect-alert", username)
-            }
+            socket.broadcast.emit("user-online", username);
 
-            const leftMessage = {
+            const joinMessage = {
                 id: uuidv4(),
-                type: "left",
-                message: `${username} left the chat`,
+                message: `${username} joined the chat`,
+                type: "join",
                 date: new Date(Date.now()).toLocaleDateString('en-IN', {
-                    weekday: 'short', day: '2-digit', month: 'short', year: 'numeric'
-                })
+                    month: 'short', year: 'numeric',
+                    weekday: 'short', day: '2-digit',
+                }),
+                sender: username
             }
             if (from === "chat") {
-                socket.broadcast.emit('left', leftMessage)
+                io.emit('joined', joinMessage)
             }
-        })
 
-        socket.emit("content-loaded")
+            socket.on("disconnect", () => {
+                if (from === "chat") {
+                    for (const [username, id] of onlineUsers) {
+                        if (id === socket.id) {
+                            onlineUsers.delete(username)
+                        }
+                    }
+                }
+
+                if (from === "video") {
+                    for (const [username, id] of videoUsers) {
+                        if (id === socket.id) {
+                            videoUsers.delete(username)
+                        }
+                    }
+                }
+
+                io.emit("user-list", {
+                    onlineUsers: Array.from(onlineUsers.keys()),
+                    videoUsers: Array.from(videoUsers.keys()),
+                    allUsers
+                })
+
+                if (from === "video") {
+                    socket.broadcast.emit("disconnect-alert", username)
+                }
+
+                const leftMessage = {
+                    id: uuidv4(),
+                    type: "left",
+                    message: `${username} left the chat`,
+                    date: new Date(Date.now()).toLocaleDateString('en-IN', {
+                        weekday: 'short', day: '2-digit', month: 'short', year: 'numeric'
+                    })
+                }
+                if (from === "chat") {
+                    socket.broadcast.emit('left', leftMessage)
+                }
+            })
+
+            socket.emit("content-loaded")
+        }
     })
 });
 
@@ -291,7 +291,7 @@ app.post('/register', async (req, res) => {
             JWT_SECRET,
             { expiresIn: "2d" }
         );
-        res.status(200).json({token})
+        res.status(200).json({ token })
 
     } catch (e) {
         res.status(400).json({ error: "Username already exists" })
@@ -312,10 +312,10 @@ app.post('/login', async (req, res) => {
     if (!isMatch) {
         return res.status(401).send({ error: "❌Invalid Credentials" })
     }
-    if (user.isBanned){
+    if (user.isBanned) {
         return res.status(403).send("User is banned")
     }
-    
+
     const token = jwt.sign({ id: user._id, username },
         JWT_SECRET,
         { expiresIn: "2d" }
@@ -331,7 +331,7 @@ app.get('/verify', Auth, async (req, res) => {
         return
     }
 
-    if (user.isBanned){
+    if (user.isBanned) {
         res.status(403).send("User is banned")
         return
     }
