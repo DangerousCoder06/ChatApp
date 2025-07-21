@@ -249,7 +249,7 @@ const Home = () => {
   const [value, setValue] = useState("")
 
   const handleChange = (e) => {
-    setValue(e.target.value.trim())
+    setValue(e.target.value)
     socket.current.emit("typing", username)
     textarea.style.height = "auto"
     textarea.style.height = `${textarea.scrollHeight}px`
@@ -260,7 +260,7 @@ const Home = () => {
     const sendMessage = {
       id: uuidv4(),
       sender: username,
-      message: value,
+      message: value.trim(),
       date: new Date(Date.now()).toLocaleDateString('en-IN', { weekday: 'short', day: '2-digit', month: 'short', year: 'numeric' }),
       time: new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: false }),
       status: "sent"
